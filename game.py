@@ -105,13 +105,10 @@ screen.fill(pygame.Color(0,0,255))
 pygame.display.flip()
 clk = pygame.time.Clock()
 
-freeze = False
 while True:
     displace = [0.0, 0.0]
     interval = clk.tick()
     markers = []
-    if freeze == False and velo == [0.0, 0.0]:
-        freeze = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -155,7 +152,6 @@ while True:
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
-            freeze = False
             
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -178,7 +174,6 @@ while True:
             col_k = collide([x0,y0],[x1,y1],p_eps,worldmap)
             markers.append([ipol(x0,x1,col_k), ipol(y0,y1,col_k)])
             #markers.append([x1 - x1%16 + 8, y1 - y1%16 + 8])
-            freeze = False
     
     displace[0] += unitize(velo, SCROLL_SPEED * interval/1000)[0]
     displace[1] += unitize(velo, SCROLL_SPEED * interval/1000)[1]
@@ -198,8 +193,8 @@ while True:
     for im in markers:
         pass#mark_point(view, screen, im[0], im[1])
     player.render(view, screen)
-    if not freeze:
-        pygame.display.flip()
+    
+    pygame.display.flip()
     #print(interval)
 
 #and then close the whole thing
