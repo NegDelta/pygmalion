@@ -10,4 +10,35 @@ class XY:
     def __init__(self, _x=0, _y=0):
         self.x = _x
         self.y = _y
-    # TODO: self[0], self[1]
+    def __getitem__(self, key):
+        if key == 0:
+            return self.x
+        elif key == 1:
+            return self.y
+        else:
+            raise IndexError
+    def __setitem__(self, key, value):
+        if key == 0:
+            self.x = value
+        elif key == 1:
+            self.y = value
+        else:
+            raise IndexError
+    def __add__(self, other):
+        self.x += other.x
+        self.y += other.y
+    def __sub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+    def __mul__(self, other):
+        self.x *= other
+        self.y *= other
+    def __truediv__(self, other):
+        self.x /= other
+        self.y /= other
+    def __floordiv__(self, other):
+        self.x //= other
+        self.y //= other
+    def __mod__(self, other):
+        self.x %= other.x
+        self.y %= other.y
