@@ -24,3 +24,21 @@ class XY:
             self.y = value
         else:
             raise IndexError
+    def __add__(self, other):
+        self.x += other.x
+        self.y += other.y
+    def __sub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+    def __mul__(self, other):
+        self.x *= other
+        self.y *= other
+    def __truediv__(self, other):
+        self.x /= other
+        self.y /= other
+    def __floordiv__(self, other):
+        self.x //= other
+        self.y //= other
+    def __mod__(self, other):
+        self.x %= other.x
+        self.y %= other.y
