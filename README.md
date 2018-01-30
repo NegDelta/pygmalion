@@ -3,7 +3,6 @@
 A proof-of-concept game+engine built on pygame.
 
 ###### TODO:
- - convert point/vector data to XY type wherever possible
  - divide movement mechanics between sprite and camera
  - remove floating-point calculations, 'cause you don't really need millionths of pixels (10ths or 16ths, right, but not _that_)
  - isolate the renderer for further GUI/HUD additions

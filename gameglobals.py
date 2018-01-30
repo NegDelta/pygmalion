@@ -2,6 +2,7 @@ import numbers
 
 CHUNK_SIZE = 16
 TILE_SIZE = 16
+CHUNK_PIXSIZE = CHUNK_SIZE * TILE_SIZE
 SCROLL_SPEED = 75
 
 assets = {}

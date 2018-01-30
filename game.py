@@ -19,21 +19,11 @@ def mark_point(area,sur,x,y):
     )
 
 def collide(p0, p1, eps, tmap):
-    # TODO: do away with, use XY
     x0, y0 = p0
     x1, y1 = p1
     
     tx0, ty0 = gettilefrompt(p0, eps)
     tx1, ty1 = gettilefrompt(p1)    
-    
-    #tx0 += getborder(x1-x0)
-    #tx1 += getborder(x1-x0)
-    #ty0 += getborder(y1-y0)
-    #ty1 += getborder(y1-y0)    
-    
-    # [1] [ ] [ ] [0] [ ] [ ] [1]
-    #  itx itx itx     itx itx itx
-    #    ix  ix  ix  ix  ix  ix     
     
     # tiles to be checked for collision
     collisiontiles = []
@@ -147,27 +137,7 @@ while True:
             # DEBUG space
             elif event.key == pygame.K_SPACE:
                 print("Player",player.x, player.y)
-                print("eps",player.epsx,player.epsy)
-            
-            # DEBUG wasd keys
-            elif event.key == pygame.K_w:
-                player.moveto(player.x, gettilefrompt(
-                    [player.x   , player.y],
-                    [player.epsx, player.epsy]
-                )[1] * TILE_SIZE)
-            elif event.key == pygame.K_s:
-                player.moveto(player.x, gettilefrompt(
-                    [player.x   , player.y],
-                    [player.epsx, player.epsy]
-                )[1] * TILE_SIZE + TILE_SIZE)
-            elif event.key == pygame.K_d:
-                player.moveto(
-                    gettilefrompt(
-                        [player.x   , player.y],
-                        [player.epsx, player.epsy]
-                    )[0] * TILE_SIZE + TILE_SIZE,
-                    player.y
-                )
+                print("eps",player.eps.x,player.eps.y)
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
@@ -202,7 +172,7 @@ while True:
     col_k = collide(
         [player.x              , player.y              ],
         [player.x + displace[0], player.y + displace[1]],
-        [player.epsx, player.epsy], worldmap
+        [player.eps.x, player.eps.y], worldmap
     )
     
     player.move(displace[0] * col_k, displace[1] * col_k)

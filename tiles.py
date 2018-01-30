@@ -1,3 +1,4 @@
+import pygame
 import random
 from gameglobals import *
 
@@ -9,6 +10,16 @@ class Chunk:
     def __init__ (self, _index):
         self.index = _index
         self.initgrund()
+        self.image = pygame.Surface((CHUNK_PIXSIZE, CHUNK_PIXSIZE))
+        for ix in range(0, CHUNK_SIZE):
+            for iy in range(0, CHUNK_SIZE):
+                self.image.blit(
+                    tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
+                    (
+                        ix * TILE_SIZE,
+                        iy * TILE_SIZE
+                    )
+                )
     
     # Generators. TODO: isolate of move to main
     def initbaka(self):
@@ -37,6 +48,13 @@ class Chunk:
         return self.contents[_tindex.x][_tindex.y]
     def set_to(self, _tindex, val):
         self.contents[_tindex.x][_tindex.y] = val
+        self.image.blit(
+            tiles[self.get(_tindex)].sprite, # sprite in tile _tindex
+            (
+                _tindex.x * TILE_SIZE,
+                _tindex.y * TILE_SIZE
+            )
+        )
 
 # This class stores info on TYPE, not any particular tile
 class Tile:
@@ -71,15 +89,15 @@ class Tilemap:
         
     # Render a given area of tiles onto a surface
     def render(self, area, sur):
-        #area is a Rect, sur a Suface
+        #area is a Rect, sur a Surface
         #ix, iy iterate over places where tiles need to be rendered (bottom-right)
-        for ix in range(area.x, area.x + area.width + 1, TILE_SIZE):
-            for iy in range(area.y, area.y + area.height + 1, TILE_SIZE):
+        for ix in range(area.x, area.x + area.width + CHUNK_PIXSIZE, CHUNK_PIXSIZE):
+            for iy in range(area.y, area.y + area.height + CHUNK_PIXSIZE, CHUNK_PIXSIZE):
                 sur.blit(
-                    tiles[self.get(XY(ix, iy) // TILE_SIZE)].sprite, # sprite in point i
+                    self.getchunk(XY(ix, iy) // CHUNK_PIXSIZE).image,
                     (
-                        ix - area.x - (area.x % TILE_SIZE),
-                        iy - area.y - (area.y % TILE_SIZE)
+                        ix - area.x - (area.x % CHUNK_PIXSIZE),
+                        iy - area.y - (area.y % CHUNK_PIXSIZE)
                     )
                 )
 

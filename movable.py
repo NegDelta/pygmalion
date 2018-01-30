@@ -14,17 +14,16 @@ class Movable:
         self.w = _w
         self.h = _h
         self.spriteid = _spriteid
-        self.epsx = 0
-        self.epsy = 0
+        self.eps = XY(0,0)
         self.weight = _weight
         self.velo = XY(0.0, 0.0)
 
     def moveepsx(self, d):
         if d != 0:
-            self.epsx = -sgn(d)
+            self.eps.x = -sgn(d)
     def moveepsy(self, d):
         if d != 0:
-            self.epsy = -sgn(d)
+            self.eps.y = -sgn(d)
 
     # Motion methods, akin to pygame.Rect
     
