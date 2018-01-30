@@ -9,6 +9,8 @@ from enginemath import *
 from tiles import *
 from movable import *
 
+# absolute dir the script is in, for relative paths
+script_dir = os.path.dirname(__file__)
 
 def mark_point(area,sur,x,y):
     sur.blit(
@@ -20,6 +22,7 @@ def mark_point(area,sur,x,y):
     )
 
 def collide(p0, p1, eps, tmap):
+    # TODO: do away with, use XY
     x0, y0 = p0
     x1, y1 = p1
     
@@ -35,11 +38,15 @@ def collide(p0, p1, eps, tmap):
     #  itx itx itx     itx itx itx
     #    ix  ix  ix  ix  ix  ix     
     
+    # tiles to be checked for collision
     collisiontiles = []
-    # looping over tile indices
+    
+    # ix,  iy  -- point coords
+    # itx, ity -- tile  coords
+    
+    # collision from top/bottom
     if y1 != y0:
-        # print('y range',y0,y1)
-        for ity in range(ty0, ty1, sgn(y1-y0)): # vertical
+        for ity in range(ty0, ty1, sgn(y1-y0)):
             iy = (ity + getborder(y1-y0)) * TILE_SIZE
             k = rev_ipol(y0, y1, iy)
             ix = ipol(x0, x1, k)
@@ -52,9 +59,9 @@ def collide(p0, p1, eps, tmap):
                 'ty': ty
             })
             
+    # from left/right
     if x1 != x0:
-        # print('x range',x0,x1)
-        for itx in range(tx0, tx1, sgn(x1-x0)): # horizontal
+        for itx in range(tx0, tx1, sgn(x1-x0)):
             ix = (itx + getborder(x1-x0)) * TILE_SIZE
             k = rev_ipol(x0, x1, ix)
             iy = ipol(y0, y1, k)
@@ -67,32 +74,42 @@ def collide(p0, p1, eps, tmap):
                 'ty': ty
             })
     
-    #tiles to check
+    # TODO: move to renderer
+    # tiles to check
     global markers
     markers += (map(lambda x:[x['tx']*16+8,x['ty']*16+8], collisiontiles))
     
+    # sort collisiontiles by k, i.e. order of getting hit
     collisiontiles = sorted(collisiontiles, key = lambda x:x['k'])
+    
     for itile in collisiontiles:
-        pass #check bordering tile for collision
+        # check bordering tile for collision
         if tiles[tmap.get(itile['tx'],itile['ty'])].coll:
             final_k = itile['k']
             break
     else:
         final_k = 1
     return final_k
+    
+####################### MAIN CODE BEGINS HERE #######
 
 pygame.init()
 
 #load assets
-assets['block'] = pygame.image.load(os.path.join('assets', 'block.png'))
-assets['sky'] = pygame.image.load(os.path.join('assets', 'sky2.png'))
-assets['marker'] = pygame.image.load(os.path.join('assets', 'marker.png'))
-assets['marker-w'] = pygame.image.load(os.path.join('assets', 'marker-w.png'))
+assets['block'] = pygame.image.load\
+                  (os.path.join(script_dir, 'assets', 'block.png'))
+assets['sky'] = pygame.image.load\
+                  (os.path.join(script_dir, 'assets', 'sky2.png'))
+assets['marker'] = pygame.image.load\
+                  (os.path.join(script_dir, 'assets', 'marker.png'))
+assets['marker-w'] = pygame.image.load\
+                  (os.path.join(script_dir, 'assets', 'marker-w.png'))
 tiles[0] = Tile('sky', False)
 tiles[1] = Tile('block', True)
 
+# initialize globals
 worldmap = Tilemap()
-velo = [0,0]
+velo = [0,0] # TODO relegate to Movable object
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(0.0, 0.0, 16, 16, 'marker')

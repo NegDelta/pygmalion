@@ -10,7 +10,9 @@ class XY:
     def __init__(self, _x=0, _y=0):
         self.x = _x
         self.y = _y
-    def __getitem__(self, key):
+    
+    # index syntax (x[0], x[1]) for compatibility w/ iterables
+    def __getitem__(self, key): 
         if key == 0:
             return self.x
         elif key == 1:
@@ -24,6 +26,8 @@ class XY:
             self.y = value
         else:
             raise IndexError
+    
+    # arithmetics
     def __add__(self, other):
         self.x += other.x
         self.y += other.y
@@ -42,3 +46,8 @@ class XY:
     def __mod__(self, other):
         self.x %= other.x
         self.y %= other.y
+    
+    def flipx(self):
+        self.x *= -1
+    def flipy(self):
+        self.y *= -1

@@ -41,7 +41,7 @@ def unitize(v, length=1):
     acc = 0
     for i in v:
         acc += i**2
-    veclen = acc ** (1 / len(v))
+    veclen = acc ** 0.5
     if veclen == 0:
         return v
     va = []

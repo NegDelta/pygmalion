@@ -1,6 +1,8 @@
 from gameglobals import *
 from enginemath import *
 
+# TODO: rewrite to allow XY arguments
+
 class Movable:
     def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0):
         self.left = _x - _w / 2
@@ -24,6 +26,8 @@ class Movable:
         if d != 0:
             self.epsy = -sgn(d)
 
+    # Motion methods, akin to pygame.Rect
+    
     def setleft(self,a):
         d = a - self.left
         self.left += d
