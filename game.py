@@ -9,9 +9,6 @@ from enginemath import *
 from tiles import *
 from movable import *
 
-# absolute dir the script is in, for relative paths
-script_dir = os.path.dirname(__file__)
-
 def mark_point(area,sur,x,y):
     sur.blit(
         assets['marker'],
@@ -84,7 +81,7 @@ def collide(p0, p1, eps, tmap):
     
     for itile in collisiontiles:
         # check bordering tile for collision
-        if tiles[tmap.get(itile['tx'],itile['ty'])].coll:
+        if tiles[tmap.get(XY(itile['tx'],itile['ty']))].coll:
             final_k = itile['k']
             break
     else:
@@ -92,6 +89,11 @@ def collide(p0, p1, eps, tmap):
     return final_k
     
 ####################### MAIN CODE BEGINS HERE #######
+
+# initialize globals
+
+# absolute dir the script is in, for relative paths
+script_dir = os.path.dirname(__file__)
 
 pygame.init()
 
@@ -107,7 +109,7 @@ assets['marker-w'] = pygame.image.load\
 tiles[0] = Tile('sky', False)
 tiles[1] = Tile('block', True)
 
-# initialize globals
+
 worldmap = Tilemap()
 velo = [0,0] # TODO relegate to Movable object
 masterclk, interval = pygame.time.get_ticks(), 0
@@ -182,15 +184,16 @@ while True:
                 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print(repr(event))
-            print(player.x, player.y)
-            x0,y0 = player.x, player.y
-            x1 = event.pos[0] + view.x
-            y1 = event.pos[1] + view.y
-            p_eps = [player.epsx, player.epsy]
-
-            col_k = collide([x0,y0],[x1,y1],p_eps,worldmap)
-            markers.append([ipol(x0,x1,col_k), ipol(y0,y1,col_k)])
-            #markers.append([x1 - x1%16 + 8, y1 - y1%16 + 8])
+            mousexy = XY(event.pos)
+            viewxy = XY(view.center)
+            realxy = mousexy + viewxy
+            print('mousexy:', mousexy)
+            print('viewxy:', viewxy)
+            print('realxy:', realxy)
+            de_tile = gettilefrompt(realxy)
+            print('tile: ', de_tile)
+            print('type: ', worldmap.get(de_tile))
+            worldmap.t = True
     
     displace[0] += unitize(velo, SCROLL_SPEED * interval/1000)[0]
     displace[1] += unitize(velo, SCROLL_SPEED * interval/1000)[1]

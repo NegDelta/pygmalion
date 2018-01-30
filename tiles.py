@@ -6,21 +6,21 @@ from gameglobals import *
 class Chunk:
     default_id = 0
     
-    def __init__ (self, _cx, _cy):
-        self.cx = _cx
-        self.cy = _cy
+    def __init__ (self, _index):
+        self.index = _index
         self.initgrund()
     
     # Generators. TODO: isolate of move to main
     def initbaka(self):
+        print('Generating chunk ', self.index) #
         self.contents = []
         for i in range(0, CHUNK_SIZE):
             self.contents += [[self.default_id] * CHUNK_SIZE]
         self.contents[1][1] = 1
     def initgrund(self):
-        if self.cy < 0:
+        if self.index.y < 0:
             self.contents = [[0] * CHUNK_SIZE] * CHUNK_SIZE
-        elif self.cy > 0:
+        elif self.index.y > 0:
             self.contents = [[1] * CHUNK_SIZE] * CHUNK_SIZE
         else:
             self.contents = []
@@ -33,10 +33,10 @@ class Chunk:
                         self.contents[i] += [0]
     
     # Get/Set tiletype from within chunk
-    def get(self, _tx, _ty):
-        return self.contents[_tx][_ty]
-    def set_to(self, _tx, _ty, val):
-        self.contents[_tx][_ty] = val
+    def get(self, _tindex):
+        return self.contents[_tindex.x][_tindex.y]
+    def set_to(self, _tindex, val):
+        self.contents[_tindex.x][_tindex.y] = val
 
 # This class stores info on TYPE, not any particular tile
 class Tile:
@@ -50,32 +50,33 @@ class Tilemap:
         self.chunks = {}
     
     # Get/Set tiletype of a single tile from within a tilemap
-    def get(self, _tx, _ty):
-        cx = _tx // CHUNK_SIZE
-        cy = _ty // CHUNK_SIZE
-        tx = _tx % CHUNK_SIZE
-        ty = _ty % CHUNK_SIZE
-        return self.getchunk(cx,cy).get(tx,ty)
-    def set_to(self, _tx, _ty, val):
-        cx = _tx // CHUNK_SIZE
-        cy = _ty // CHUNK_SIZE
-        tx = _tx % CHUNK_SIZE
-        ty = _ty % CHUNK_SIZE
-        self.getchunk(cx,cy).set_to(tx,ty,val)
+    def get(self, _tindex):
+        if type(_tindex) != XY:
+            _tindex = XY(_tindex)
+        cindex = _tindex // CHUNK_SIZE
+        tindex = _tindex % CHUNK_SIZE
+        return self.getchunk(cindex).get(tindex)
+    def set_to(self, _tindex, val):
+        if type(_tindex) != XY:
+            _tindex = XY(_tindex)
+        cindex = _tindex // CHUNK_SIZE
+        tindex = _tindex % CHUNK_SIZE
+        self.getchunk(cindex).set_to(tindex,val)
     
     # Get a single chunk from within a tilemap
-    def getchunk(self, _cx, _cy):
-        if not (_cx, _cy) in self.chunks.keys():
-            self.chunks[_cx,_cy] = Chunk(_cx,_cy)
-        return self.chunks[_cx,_cy]
+    def getchunk(self, _cindex):
+        if not (_cindex.totuple()) in self.chunks.keys():
+            self.chunks[_cindex.totuple()] = Chunk(_cindex)
+        return self.chunks[_cindex.totuple()]
         
     # Render a given area of tiles onto a surface
     def render(self, area, sur):
         #area is a Rect, sur a Suface
+        #ix, iy iterate over places where tiles need to be rendered (bottom-right)
         for ix in range(area.x, area.x + area.width + 1, TILE_SIZE):
             for iy in range(area.y, area.y + area.height + 1, TILE_SIZE):
                 sur.blit(
-                    tiles[self.get(ix // TILE_SIZE, iy // TILE_SIZE)].sprite,
+                    tiles[self.get(XY(ix, iy) // TILE_SIZE)].sprite, # sprite in point i
                     (
                         ix - area.x - (area.x % TILE_SIZE),
                         iy - area.y - (area.y % TILE_SIZE)
@@ -83,7 +84,7 @@ class Tilemap:
                 )
 
 # Convert point XY with epsilon data to tile XY index
-def gettilefrompt(pt, eps=[0,0]):
+def gettilefrompt(pt, eps=XY(0,0)):
     return [
         int(pt[0] // TILE_SIZE - (eps[0] < 0 and pt[0] % TILE_SIZE == 0)),
         int(pt[1] // TILE_SIZE - (eps[1] < 0 and pt[1] % TILE_SIZE == 0))
