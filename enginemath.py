@@ -39,15 +39,11 @@ def dirsub(p1,p2):
 # Return vector of same direction but of given length
 def unitize(v, length=1):
     acc = 0
-    for i in v:
-        acc += i**2
-    veclen = acc ** 0.5
+    veclen = (v.x**2 + v.y**2) ** 0.5
     if veclen == 0:
         return v
-    va = []
-    for i in v:
-        va += [i * length / veclen]
-    return va
+    else:
+        return v * (length / veclen)
 
 # Return coordinate offset from block that point is in
 # and border about to be hit with given velocity

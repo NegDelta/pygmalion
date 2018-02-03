@@ -88,3 +88,6 @@ class XY:
     def flipy(self):
         self.y *= -1
         return self
+
+    def xylen(self):
+        return (self.x**2 + self.y**2) ** 0.5

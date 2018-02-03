@@ -9,10 +9,8 @@ class Movable:
         self.top = _y - _h / 2
         self.right = _x + _w / 2
         self.bottom = _y + _h / 2
-        self.x = _x
-        self.y = _y
-        self.w = _w
-        self.h = _h
+        self.center = XY(_x, _y)
+        self.size = XY(_w, _h)
         self.spriteid = _spriteid
         self.eps = XY(0,0)
         self.weight = _weight
@@ -31,7 +29,7 @@ class Movable:
         d = a - self.left
         self.left += d
         self.right += d
-        self.x += d
+        self.center.x += d
         self.moveepsx(d)
     def setright(self,a):
         d = a - self.right
@@ -44,27 +42,24 @@ class Movable:
         d = a - self.top
         self.top += d
         self.bottom += d
-        self.y += d
+        self.center.y += d
         self.moveepsy(d)
     def setbottom(self,a):
         d = a - self.bottom
         self.top += d
         self.bottom += d
-        self.y += d
+        self.center.y += d
         self.moveepsy(d)
  
     def move(self,dx,dy):
-        self.x += dx
-        self.y += dy
+        self.center.x += dx
+        self.center.y += dy
         self.left += dx
         self.top += dy
         self.right += dx
         self.bottom += dy
         self.moveepsx(dx)
         self.moveepsy(dy)
- 
-    def moveto(self,_x,_y):
-        self.move(_x - self.x, _y - self.y)
         
     def render(self,area,sur):
         sur.blit(

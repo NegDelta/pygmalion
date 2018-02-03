@@ -19,8 +19,8 @@ def mark_point(area,sur,x,y):
     )
 
 def collide(p0, p1, eps, tmap):
-    x0, y0 = p0
-    x1, y1 = p1
+    x0, y0 = p0.totuple()
+    x1, y1 = p1.totuple()
     
     tx0, ty0 = gettilefrompt(p0, eps)
     tx1, ty1 = gettilefrompt(p1)    
@@ -101,7 +101,6 @@ tiles[1] = Tile('block', True)
 
 
 worldmap = Tilemap()
-velo = [0,0] # TODO relegate to Movable object
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(0.0, 0.0, 16, 16, 'marker')
@@ -115,7 +114,7 @@ pygame.display.flip()
 clk = pygame.time.Clock()
 
 while True:
-    displace = [0.0, 0.0]
+    displace = XY(0.0, 0.0)
     interval = clk.tick()
     markers = []
     for event in pygame.event.get():
@@ -124,34 +123,37 @@ while True:
         
         # keypresses
         elif event.type == pygame.KEYDOWN:
+            # TODO: relegate to Controls or MoveMech
             # arrow keys - add movement
             if event.key == pygame.K_LEFT:
-                velo = diradd(velo,[-1, 0])
+                player.velo = diradd(player.velo,[-1, 0])
             if event.key == pygame.K_DOWN:
-                velo = diradd(velo,[ 0, 1])
+                player.velo = diradd(player.velo,[ 0, 1])
             if event.key == pygame.K_UP:
-                velo = diradd(velo,[ 0,-1])
+                player.velo = diradd(player.velo,[ 0,-1])
             if event.key == pygame.K_RIGHT:
-                velo = diradd(velo,[ 1, 0])
+                player.velo = diradd(player.velo,[ 1, 0])
             
             # DEBUG space
             elif event.key == pygame.K_SPACE:
-                print("Player",player.x, player.y)
-                print("eps",player.eps.x,player.eps.y)
+                print(SCROLL_SPEED * interval/1000)
+                print(unitize(player.velo, SCROLL_SPEED * interval/1000))
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
             
         elif event.type == pygame.KEYUP:
+            # TODO: relegate to Controls or MoveMech
             if event.key == pygame.K_LEFT:
-                velo = dirsub(velo,[-1, 0])
+                player.velo = dirsub(player.velo,[-1, 0])
             if event.key == pygame.K_DOWN:
-                velo = dirsub(velo,[ 0, 1])
+                player.velo = dirsub(player.velo,[ 0, 1])
             if event.key == pygame.K_UP:
-                velo = dirsub(velo,[ 0,-1])
+                player.velo = dirsub(player.velo,[ 0,-1])
             if event.key == pygame.K_RIGHT:
-                velo = dirsub(velo,[ 1, 0])
+                player.velo = dirsub(player.velo,[ 1, 0])
                 
+        # DEBUG
         elif event.type == pygame.MOUSEBUTTONDOWN:
             print(repr(event))
             mousexy = XY(event.pos)
@@ -165,19 +167,23 @@ while True:
             print('type: ', worldmap.get(de_tile))
             worldmap.t = True
     
-    displace[0] += unitize(velo, SCROLL_SPEED * interval/1000)[0]
-    displace[1] += unitize(velo, SCROLL_SPEED * interval/1000)[1]
+    displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
     
+    # TODO: account for movables bigger than tile size
     # collide
-    col_k = collide(
-        [player.x              , player.y              ],
-        [player.x + displace[0], player.y + displace[1]],
-        [player.eps.x, player.eps.y], worldmap
-    )
+    edges = list()
+    edges.append(XY(player.left,  player.top))
+    edges.append(XY(player.left,  player.bottom))
+    edges.append(XY(player.right, player.top))
+    edges.append(XY(player.right, player.bottom))
+    
+    col_k = min(map(lambda edge : collide(
+        edge, edge + displace, player.eps, worldmap
+    ), edges))
     
     player.move(displace[0] * col_k, displace[1] * col_k)
-    view.x = player.x - 320
-    view.y = player.y - 240
+    view.x = player.center.x - 320
+    view.y = player.center.y - 240
     
     worldmap.render(view, screen)
     for im in markers:
