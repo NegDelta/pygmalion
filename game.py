@@ -1,6 +1,6 @@
 import os,sys
-import random
 import pygame
+import math # for collision code
 from pygame.locals import *
 
 #locals
@@ -37,7 +37,6 @@ def collide(p0, p1, eps, tmap):
             iy = (ity + getborder(y1-y0)) * TILE_SIZE
             k = rev_ipol(y0, y1, iy)
             ix = ipol(x0, x1, k)
-            print('ver:',ix,iy)
             tx = gettilefrompt([ix,iy],eps)[0]
             ty = ity + sgn(y1-y0)
             collisiontiles.append({
@@ -52,7 +51,6 @@ def collide(p0, p1, eps, tmap):
             ix = (itx + getborder(x1-x0)) * TILE_SIZE
             k = rev_ipol(x0, x1, ix)
             iy = ipol(y0, y1, k)
-            print('hor:',ix,iy)
             tx = itx + sgn(x1-x0)
             ty = gettilefrompt([ix,iy],eps)[1]
             collisiontiles.append({
@@ -169,13 +167,28 @@ while True:
     
     displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
     
-    # TODO: account for movables bigger than tile size
     # collide
     edges = list()
+    
+    # corners
     edges.append(XY(player.left,  player.top))
     edges.append(XY(player.left,  player.bottom))
     edges.append(XY(player.right, player.top))
     edges.append(XY(player.right, player.bottom))
+    
+    # points along the edges, just enough to have at least one on each tile
+    # Edge cases would fit there just as well, but the less flops the better
+    xrange = math.ceil(player.size.x / TILE_SIZE)
+    for i in range(1, xrange-1):
+        ix = ipol(player.left, player.right, i/xrange)
+        edges.append(XY(ix, player.top))
+        edges.append(XY(ix, player.bottom))
+        
+    yrange = math.ceil(player.size.y / TILE_SIZE)
+    for i in range(1, yrange-1):
+        iy = ipol(player.top, player.bottom, i/xrange)
+        edges.append(XY(player.left,  iy))
+        edges.append(XY(player.right, iy))
     
     col_k = min(map(lambda edge : collide(
         edge, edge + displace, player.eps, worldmap
