@@ -29,7 +29,7 @@ class Chunk:
         print('Generating chunk ', self.index) #
         self.contents = []
         for i in range(0, CHUNK_SIZE):
-            self.contents += [[self.default_id] * CHUNK_SIZE]
+            self.contents.append([[self.default_id] * CHUNK_SIZE])
         self.contents[1][1] = 1
     def initgrund(self):
         if self.index.y < 0:
@@ -39,12 +39,12 @@ class Chunk:
         else:
             self.contents = []
             for i in range(0, CHUNK_SIZE):
-                self.contents += [[]]
+                self.contents.append([[]])
                 for j in range(0, CHUNK_SIZE):
                     if j / CHUNK_SIZE > random.random():
-                        self.contents[i] += [1]
+                        self.contents[i].append([1])
                     else:
-                        self.contents[i] += [0]
+                        self.contents[i].append([0])
     
     # Get/Set tiletype from within chunk
     def get(self, _tindex):
