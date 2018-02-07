@@ -1,9 +1,12 @@
 import numbers
 
+TILE_SIZE = 256
 CHUNK_SIZE = 16
-TILE_SIZE = 16
+DISPLAY_FACTOR = 16
+TILE_SCRSIZE = TILE_SIZE / DISPLAY_FACTOR
 CHUNK_PIXSIZE = CHUNK_SIZE * TILE_SIZE
-SCROLL_SPEED = 75
+CHUNK_SCRSIZE = CHUNK_SIZE * TILE_SCRSIZE
+SCROLL_SPEED = 75*16
 
 assets = {}
 tiles = {}
@@ -70,6 +73,10 @@ class XY:
             self.x // other,
             self.y // other
         )
+    def intize(self):
+        self.x = int(self.x)
+        self.y = int(self.y)
+        return self
     def __mod__(self, other):
         if type(other) == XY:
             return XY(
@@ -91,3 +98,11 @@ class XY:
 
     def xylen(self):
         return (self.x**2 + self.y**2) ** 0.5
+
+class Camera:
+    def __init__(self):
+        self.rect = _rect
+        self.tilemap = _map
+        
+    def record(self):
+        pass

@@ -2,26 +2,29 @@ import pygame
 import random
 from gameglobals import *
 
-# TODO: relegate generator to arbitrary function
 # TODO: add support for partial initialization
 class Chunk:
     default_id = 0
     
     def __init__ (self, _index):
         self.index = _index
-        self.initgrund()
-        self.image = pygame.Surface((CHUNK_PIXSIZE, CHUNK_PIXSIZE))
+        self.initmap()
+        self.image = pygame.Surface((int(CHUNK_SCRSIZE), int(CHUNK_SCRSIZE)))
+        
         for ix in range(0, CHUNK_SIZE):
             for iy in range(0, CHUNK_SIZE):
                 self.image.blit(
                     tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
                     (
-                        ix * TILE_SIZE,
-                        iy * TILE_SIZE
+                        ix * TILE_SIZE / DISPLAY_FACTOR,
+                        iy * TILE_SIZE / DISPLAY_FACTOR
                     )
                 )
     
-    # Generators. TODO: isolate of move to main
+    def initmap(self):
+        self.initgrund()
+    
+    # Generators. TODO: isolate or move to main
     def initbaka(self):
         print('Generating chunk ', self.index) #
         self.contents = []
@@ -66,6 +69,7 @@ class Tile:
 class Tilemap:
     def __init__(self):
         self.chunks = {}
+        self.go = False
     
     # Get/Set tiletype of a single tile from within a tilemap
     def get(self, _tindex):
@@ -90,16 +94,34 @@ class Tilemap:
     # Render a given area of tiles onto a surface
     def render(self, area, sur):
         #area is a Rect, sur a Surface
-        #ix, iy iterate over places where tiles need to be rendered (bottom-right)
-        for ix in range(area.x, area.x + area.width + CHUNK_PIXSIZE, CHUNK_PIXSIZE):
-            for iy in range(area.y, area.y + area.height + CHUNK_PIXSIZE, CHUNK_PIXSIZE):
+        #ix, iy iterate over places where chunk need to be rendered (bottom-right)
+        for ix in range(area.x, area.x + area.width + int(CHUNK_SCRSIZE/DISPLAY_FACTOR), int(CHUNK_SCRSIZE*DISPLAY_FACTOR)):
+            for iy in range(area.y, area.y + area.height + int(CHUNK_SCRSIZE/DISPLAY_FACTOR), int(CHUNK_SCRSIZE*DISPLAY_FACTOR)):
                 sur.blit(
-                    self.getchunk(XY(ix, iy) // CHUNK_PIXSIZE).image,
+                    self.getchunk(XY(ix, iy) // CHUNK_SCRSIZE).image,
                     (
-                        ix - area.x - (area.x % CHUNK_PIXSIZE),
-                        iy - area.y - (area.y % CHUNK_PIXSIZE)
+                        (ix - area.x - (area.x % CHUNK_SCRSIZE)) / DISPLAY_FACTOR,
+                        (iy - area.y - (area.y % CHUNK_SCRSIZE)) / DISPLAY_FACTOR
                     )
                 )
+            
+    def tocamera(self, cam):
+        # ix, iy are chunk-coords
+        c0 = (XY(cam.rect.topleft) / CHUNK_PIXSIZE).intize()
+        c1 = (XY(cam.rect.bottomright) / CHUNK_PIXSIZE).intize()
+        for ix in range(c0.x - 1, c1.x + 1):
+            for iy in range(c0.y - 1, c1.y + 1):
+                if self.go:
+                    print (c1-c0)
+                    self.go = False
+                ixy = XY(ix, iy)
+                cam.sur.blit(
+                    self.getchunk(ixy).image,
+                    (
+                        cam.worldtoscreen(ixy * CHUNK_SCRSIZE * DISPLAY_FACTOR).totuple()
+                    )
+                )
+        
 
 # Convert point XY with epsilon data to tile XY index
 def gettilefrompt(pt, eps=XY(0,0)):

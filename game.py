@@ -8,15 +8,7 @@ from gameglobals import *
 from enginemath import *
 from tiles import *
 from movable import *
-
-def mark_point(area,sur,x,y):
-    sur.blit(
-        assets['marker'],
-        (
-            int(x) - area.x - 8,
-            int(y) - area.y - 8
-        )
-    )
+from camera import *
 
 def collide(p0, p1, eps, tmap):
     x0, y0 = p0.totuple()
@@ -59,11 +51,6 @@ def collide(p0, p1, eps, tmap):
                 'ty': ty
             })
     
-    # TODO: move to renderer
-    # tiles to check
-    global markers
-    markers += (map(lambda x:[x['tx']*16+8,x['ty']*16+8], collisiontiles))
-    
     # sort collisiontiles by k, i.e. order of getting hit
     collisiontiles = sorted(collisiontiles, key = lambda x:x['k'])
     
@@ -101,13 +88,16 @@ tiles[1] = Tile('block', True)
 worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
-player = Movable(0.0, 0.0, 16, 16, 'marker')
+player = Movable(0.0, 0.0, 200, 200, 'marker')
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
 view = screen.get_rect()
+view.w *= DISPLAY_FACTOR
+view.h *= DISPLAY_FACTOR
 
-screen.fill(pygame.Color(0,0,255))
+camera = Camera(screen, player)
+
 pygame.display.flip()
 clk = pygame.time.Clock()
 
@@ -134,8 +124,7 @@ while True:
             
             # DEBUG space
             elif event.key == pygame.K_SPACE:
-                print(SCROLL_SPEED * interval/1000)
-                print(unitize(player.velo, SCROLL_SPEED * interval/1000))
+                worldmap.go = True
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
@@ -195,15 +184,11 @@ while True:
     ), edges))
     
     player.move(displace[0] * col_k, displace[1] * col_k)
-    view.x = player.center.x - 320
-    view.y = player.center.y - 240
     
-    worldmap.render(view, screen)
-    for im in markers:
-        pass#mark_point(view, screen, im[0], im[1])
-    player.render(view, screen)
+    camera.update()
+    worldmap.tocamera(camera)
+    player.tocamera(camera)
     
     pygame.display.flip()
-    #print(interval)
 
 #and then close the whole thing

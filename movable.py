@@ -65,7 +65,14 @@ class Movable:
         sur.blit(
             assets[self.spriteid],
             (
-                self.left - area.x,
-                self.top - area.y
+                self.left / DISPLAY_FACTOR - area.x,
+                self.top / DISPLAY_FACTOR - area.y
+            )
+        ) 
+    def tocamera(self,cam):
+        cam.sur.blit(
+            assets[self.spriteid],
+            (
+                cam.worldtoscreen(XY(self.left, self.top)).totuple()
             )
         )
