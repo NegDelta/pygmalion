@@ -9,16 +9,16 @@ class Chunk:
     def __init__ (self, _index):
         self.index = _index
         self.initmap()
-        self.image = pygame.Surface((int(CHUNK_SCRSIZE), int(CHUNK_SCRSIZE)))
+        self.image = pygame.Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
         
-        for ix in range(0, CHUNK_SIZE):
-            for iy in range(0, CHUNK_SIZE):
+        for ix in range(0, TILES_PER_CHUNK):
+            for iy in range(0, TILES_PER_CHUNK):
                 try:
                     self.image.blit(
                         tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
                         (
-                            ix * TILE_SIZE / DISPLAY_FACTOR,
-                            iy * TILE_SIZE / DISPLAY_FACTOR
+                            ix * QUANTS_PER_TILE / QUANTS_PER_PIXEL,
+                            iy * QUANTS_PER_TILE / QUANTS_PER_PIXEL
                         )
                     )
                 except TypeError:
@@ -32,20 +32,20 @@ class Chunk:
     def initbaka(self):
         print('Generating chunk ', self.index) #
         self.contents = []
-        for i in range(0, CHUNK_SIZE):
-            self.contents.append([[self.default_id] * CHUNK_SIZE])
+        for i in range(0, TILES_PER_CHUNK):
+            self.contents.append([[self.default_id] * TILES_PER_CHUNK])
         self.contents[1][1] = 1
     def initgrund(self):
         if self.index.y < 0:
-            self.contents = [[0] * CHUNK_SIZE] * CHUNK_SIZE
+            self.contents = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         elif self.index.y > 0:
-            self.contents = [[1] * CHUNK_SIZE] * CHUNK_SIZE
+            self.contents = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         else:
             self.contents = []
-            for i in range(0, CHUNK_SIZE):
+            for i in range(0, TILES_PER_CHUNK):
                 self.contents.append([])
-                for j in range(0, CHUNK_SIZE):
-                    if j / CHUNK_SIZE > random.random():
+                for j in range(0, TILES_PER_CHUNK):
+                    if j / TILES_PER_CHUNK > random.random():
                         self.contents[i].append(1)
                     else:
                         self.contents[i].append(0)
@@ -58,8 +58,8 @@ class Chunk:
         self.image.blit(
             tiles[self.get(_tindex)].sprite, # sprite in tile _tindex
             (
-                _tindex.x * TILE_SIZE,
-                _tindex.y * TILE_SIZE
+                _tindex.x * QUANTS_PER_TILE,
+                _tindex.y * QUANTS_PER_TILE
             )
         )
 
@@ -79,14 +79,14 @@ class Tilemap:
     def get(self, _tindex):
         if type(_tindex) != XY:
             _tindex = XY(_tindex)
-        cindex = _tindex // CHUNK_SIZE
-        tindex = _tindex % CHUNK_SIZE
+        cindex = _tindex // TILES_PER_CHUNK
+        tindex = _tindex % TILES_PER_CHUNK
         return self.getchunk(cindex).get(tindex)
     def set_to(self, _tindex, val):
         if type(_tindex) != XY:
             _tindex = XY(_tindex)
-        cindex = _tindex // CHUNK_SIZE
-        tindex = _tindex % CHUNK_SIZE
+        cindex = _tindex // TILES_PER_CHUNK
+        tindex = _tindex % TILES_PER_CHUNK
         self.getchunk(cindex).set_to(tindex,val)
     
     # Get a single chunk from within a tilemap
@@ -99,26 +99,26 @@ class Tilemap:
     def render(self, area, sur):
         #area is a Rect, sur a Surface
         #ix, iy iterate over places where chunk need to be rendered (bottom-right)
-        for ix in range(area.x, area.x + area.width + int(CHUNK_SCRSIZE/DISPLAY_FACTOR), int(CHUNK_SCRSIZE*DISPLAY_FACTOR)):
-            for iy in range(area.y, area.y + area.height + int(CHUNK_SCRSIZE/DISPLAY_FACTOR), int(CHUNK_SCRSIZE*DISPLAY_FACTOR)):
+        for ix in range(area.x, area.x + area.width + int(PIXELS_PER_CHUNK/QUANTS_PER_PIXEL), int(PIXELS_PER_CHUNK*QUANTS_PER_PIXEL)):
+            for iy in range(area.y, area.y + area.height + int(PIXELS_PER_CHUNK/QUANTS_PER_PIXEL), int(PIXELS_PER_CHUNK*QUANTS_PER_PIXEL)):
                 sur.blit(
-                    self.getchunk(XY(ix, iy) // CHUNK_SCRSIZE).image,
+                    self.getchunk(XY(ix, iy) // PIXELS_PER_CHUNK).image,
                     (
-                        (ix - area.x - (area.x % CHUNK_SCRSIZE)) / DISPLAY_FACTOR,
-                        (iy - area.y - (area.y % CHUNK_SCRSIZE)) / DISPLAY_FACTOR
+                        (ix - area.x - (area.x % PIXELS_PER_CHUNK)) / QUANTS_PER_PIXEL,
+                        (iy - area.y - (area.y % PIXELS_PER_CHUNK)) / QUANTS_PER_PIXEL
                     )
                 )
             
     def tocamera(self, cam):
         # ix, iy are chunk-coords
-        c0 = (XY(cam.rect.topleft) / CHUNK_PIXSIZE).intize()
-        c1 = (XY(cam.rect.bottomright) / CHUNK_PIXSIZE).intize()
+        c0 = (XY(cam.rect.topleft) / QUANTS_PER_CHUNK).intize()
+        c1 = (XY(cam.rect.bottomright) / QUANTS_PER_CHUNK).intize()
         for ix in range(c0.x - 1, c1.x + 1):
             for iy in range(c0.y - 1, c1.y + 1):
                 ixy = XY(ix, iy)
                 # point on screen where chunk is rendered
                 scr_targetxy = cam.worldtoscreen(
-                    ixy * CHUNK_SCRSIZE * DISPLAY_FACTOR
+                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL
                 ).floor()
                 if self.go:
                     print(ixy, scr_targetxy)
@@ -131,6 +131,6 @@ class Tilemap:
 # Convert point XY with epsilon data to tile XY index
 def gettilefrompt(pt, eps=XY(0,0)):
     return [
-        int(pt[0] // TILE_SIZE - (eps[0] < 0 and pt[0] % TILE_SIZE == 0)),
-        int(pt[1] // TILE_SIZE - (eps[1] < 0 and pt[1] % TILE_SIZE == 0))
+        int(pt[0] // QUANTS_PER_TILE - (eps[0] < 0 and pt[0] % QUANTS_PER_TILE == 0)),
+        int(pt[1] // QUANTS_PER_TILE - (eps[1] < 0 and pt[1] % QUANTS_PER_TILE == 0))
     ]

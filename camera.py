@@ -9,19 +9,19 @@ class Camera:
         
         # rect in world coordinates
         self.rect = _sur.get_rect()
-        self.rect.width *= DISPLAY_FACTOR
-        self.rect.height *= DISPLAY_FACTOR
+        self.rect.width *= QUANTS_PER_PIXEL
+        self.rect.height *= QUANTS_PER_PIXEL
         print('Init\'d camera of size ' + repr(self.rect.size))
     
     # Convert between in-world and on-screen coordinates
     
     def worldtoscreen(self, xy):
-        return (xy - XY(self.rect.topleft)) / DISPLAY_FACTOR
-        #return xy / DISPLAY_FACTOR - XY(self.rect.topleft)
+        return (xy - XY(self.rect.topleft)) / QUANTS_PER_PIXEL
+        #return xy / QUANTS_PER_PIXEL - XY(self.rect.topleft)
         
     def screentoworld(self, xy):
-        return xy * DISPLAY_FACTOR + XY(self.rect.topleft)
-        #return (xy + XY(self.rect.topleft)) * DISPLAY_FACTOR
+        return xy * QUANTS_PER_PIXEL + XY(self.rect.topleft)
+        #return (xy + XY(self.rect.topleft)) * QUANTS_PER_PIXEL
     
     def render(self):
         pass

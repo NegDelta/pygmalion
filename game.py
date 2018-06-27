@@ -26,7 +26,7 @@ def collide(p0, p1, eps, tmap):
     # collision from top/bottom
     if y1 != y0:
         for ity in range(ty0, ty1, sgn(y1-y0)):
-            iy = (ity + getborder(y1-y0)) * TILE_SIZE
+            iy = (ity + getborder(y1-y0)) * QUANTS_PER_TILE
             k = rev_ipol(y0, y1, iy)
             ix = ipol(x0, x1, k)
             tx = gettilefrompt([ix,iy],eps)[0]
@@ -40,7 +40,7 @@ def collide(p0, p1, eps, tmap):
     # from left/right
     if x1 != x0:
         for itx in range(tx0, tx1, sgn(x1-x0)):
-            ix = (itx + getborder(x1-x0)) * TILE_SIZE
+            ix = (itx + getborder(x1-x0)) * QUANTS_PER_TILE
             k = rev_ipol(x0, x1, ix)
             iy = ipol(y0, y1, k)
             tx = itx + sgn(x1-x0)
@@ -93,8 +93,8 @@ player = Movable(0.0, 0.0, 200, 200, 'marker')
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
 view = screen.get_rect()
-view.w *= DISPLAY_FACTOR
-view.h *= DISPLAY_FACTOR
+view.w *= QUANTS_PER_PIXEL
+view.h *= QUANTS_PER_PIXEL
 
 camera = Camera(screen, player)
 
@@ -167,13 +167,13 @@ while True:
     
     # points along the edges, just enough to have at least one on each tile
     # Edge cases would fit there just as well, but the less flops the better
-    xrange = math.ceil(player.size.x / TILE_SIZE)
+    xrange = math.ceil(player.size.x / QUANTS_PER_TILE)
     for i in range(1, xrange-1):
         ix = ipol(player.left, player.right, i/xrange)
         edges.append(XY(ix, player.top))
         edges.append(XY(ix, player.bottom))
         
-    yrange = math.ceil(player.size.y / TILE_SIZE)
+    yrange = math.ceil(player.size.y / QUANTS_PER_TILE)
     for i in range(1, yrange-1):
         iy = ipol(player.top, player.bottom, i/xrange)
         edges.append(XY(player.left,  iy))
