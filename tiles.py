@@ -115,16 +115,17 @@ class Tilemap:
         c1 = (XY(cam.rect.bottomright) / CHUNK_PIXSIZE).intize()
         for ix in range(c0.x - 1, c1.x + 1):
             for iy in range(c0.y - 1, c1.y + 1):
-                if self.go:
-                    print (c1-c0)
-                    self.go = False
                 ixy = XY(ix, iy)
-                cam.sur.blit(
-                    self.getchunk(ixy).image,
-                    (
-                        cam.worldtoscreen(ixy * CHUNK_SCRSIZE * DISPLAY_FACTOR).totuple()
-                    )
-                )
+                # point on screen where chunk is rendered
+                scr_targetxy = cam.worldtoscreen(
+                    ixy * CHUNK_SCRSIZE * DISPLAY_FACTOR
+                ).floor()
+                if self.go:
+                    print(ixy, scr_targetxy)
+                cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
+        if self.go:
+            print(cam.rect)
+        self.go = False
         
 
 # Convert point XY with epsilon data to tile XY index

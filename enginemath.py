@@ -6,8 +6,11 @@ def sgn(x):
         return -1
     elif x == 0:
         return 0
-    else:
-        return None
+    return None
+
+# Floor. Works down, not towards 0
+def floor(x):
+    return x//1
 
 # Interpolate between x0 (for k=0) & x1 (for k=1)
 def ipol(x0, x1, k):

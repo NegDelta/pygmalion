@@ -1,11 +1,13 @@
 import numbers
+from enginemath import *
 
 TILE_SIZE = 256
-CHUNK_SIZE = 4
+CHUNK_SIZE = 20
 DISPLAY_FACTOR = 16
 TILE_SCRSIZE = TILE_SIZE / DISPLAY_FACTOR
 CHUNK_PIXSIZE = CHUNK_SIZE * TILE_SIZE
 CHUNK_SCRSIZE = CHUNK_SIZE * TILE_SCRSIZE
+
 SCROLL_SPEED = 75*16
 
 assets = {}
@@ -94,6 +96,11 @@ class XY:
         return self
     def flipy(self):
         self.y *= -1
+        return self
+    
+    def floor(self):
+        self.x = floor(self.x)
+        self.y = floor(self.y)
         return self
 
     def xylen(self):

@@ -12,7 +12,9 @@ class Camera:
         self.rect.width *= DISPLAY_FACTOR
         self.rect.height *= DISPLAY_FACTOR
         print('Init\'d camera of size ' + repr(self.rect.size))
-        
+    
+    # Convert between in-world and on-screen coordinates
+    
     def worldtoscreen(self, xy):
         return (xy - XY(self.rect.topleft)) / DISPLAY_FACTOR
         #return xy / DISPLAY_FACTOR - XY(self.rect.topleft)
