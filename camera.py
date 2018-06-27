@@ -11,7 +11,7 @@ class Camera:
         self.rect = _sur.get_rect()
         self.rect.width *= DISPLAY_FACTOR
         self.rect.height *= DISPLAY_FACTOR
-        print('Init\'d camera of size ' + self.rect.size)
+        print('Init\'d camera of size ' + repr(self.rect.size))
         
     def worldtoscreen(self, xy):
         return (xy - XY(self.rect.topleft)) / DISPLAY_FACTOR
