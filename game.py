@@ -167,15 +167,15 @@ while True:
     
     # points along the edges, just enough to have at least one on each tile
     # Edge cases would fit there just as well, but the less flops the better
-    xrange = math.ceil(player.size.x / QUANTS_PER_TILE)
-    for i in range(1, xrange-1):
-        ix = ipol(player.left, player.right, i/xrange)
+    x_range = math.ceil(player.size.x / QUANTS_PER_TILE)
+    for i in range(1, x_range-1):
+        ix = ipol(player.left, player.right, i/x_range)
         edges.append(XY(ix, player.top))
         edges.append(XY(ix, player.bottom))
         
-    yrange = math.ceil(player.size.y / QUANTS_PER_TILE)
-    for i in range(1, yrange-1):
-        iy = ipol(player.top, player.bottom, i/xrange)
+    y_range = math.ceil(player.size.y / QUANTS_PER_TILE)
+    for i in range(1, y_range-1):
+        iy = ipol(player.top, player.bottom, i/y_range)
         edges.append(XY(player.left,  iy))
         edges.append(XY(player.right, iy))
     

@@ -2,6 +2,8 @@ from gameglobals import *
 from enginemath import *
 
 # TODO: rewrite to allow XY arguments
+# TODO: consider ditching in favor of pygame.Rect
+#       (but what about XY)
 
 class Movable:
     def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0):
@@ -65,8 +67,8 @@ class Movable:
         sur.blit(
             assets[self.spriteid],
             (
-                self.left / DISPLAY_FACTOR - area.x,
-                self.top / DISPLAY_FACTOR - area.y
+                self.left / QUANTS_PER_PIXEL - area.x,
+                self.top / QUANTS_PER_PIXEL - area.y
             )
         ) 
     def tocamera(self,cam):
