@@ -13,14 +13,18 @@ class Chunk:
         
         for ix in range(0, CHUNK_SIZE):
             for iy in range(0, CHUNK_SIZE):
-                self.image.blit(
-                    tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
-                    (
-                        ix * TILE_SIZE / DISPLAY_FACTOR,
-                        iy * TILE_SIZE / DISPLAY_FACTOR
+                try:
+                    self.image.blit(
+                        tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
+                        (
+                            ix * TILE_SIZE / DISPLAY_FACTOR,
+                            iy * TILE_SIZE / DISPLAY_FACTOR
+                        )
                     )
-                )
-    
+                except TypeError:
+                    print(self.contents[ix])
+                    raise
+                    
     def initmap(self):
         self.initgrund()
     
@@ -39,12 +43,12 @@ class Chunk:
         else:
             self.contents = []
             for i in range(0, CHUNK_SIZE):
-                self.contents.append([[]])
+                self.contents.append([])
                 for j in range(0, CHUNK_SIZE):
                     if j / CHUNK_SIZE > random.random():
-                        self.contents[i].append([1])
+                        self.contents[i].append(1)
                     else:
-                        self.contents[i].append([0])
+                        self.contents[i].append(0)
     
     # Get/Set tiletype from within chunk
     def get(self, _tindex):

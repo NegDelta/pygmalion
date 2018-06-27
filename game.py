@@ -76,7 +76,7 @@ pygame.init()
 assets['block'] = pygame.image.load\
                   (os.path.join(script_dir, 'assets', 'block.png'))
 assets['sky'] = pygame.image.load\
-                  (os.path.join(script_dir, 'assets', 'sky2.png'))
+                  (os.path.join(script_dir, 'assets', 'sky.png'))
 assets['marker'] = pygame.image.load\
                   (os.path.join(script_dir, 'assets', 'marker.png'))
 assets['marker-w'] = pygame.image.load\
