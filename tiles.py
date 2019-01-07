@@ -96,20 +96,7 @@ class Tilemap:
             self.chunks[_cindex.totuple()] = Chunk(_cindex)
         return self.chunks[_cindex.totuple()]
         
-    # Render a given area of tiles onto a surface
-    def render(self, area, sur):
-        #area is a Rect, sur a Surface
-        #ix, iy iterate over places where chunk need to be rendered (bottom-right)
-        for ix in range(area.x, area.x + area.width + int(PIXELS_PER_CHUNK/QUANTS_PER_PIXEL), int(PIXELS_PER_CHUNK*QUANTS_PER_PIXEL)):
-            for iy in range(area.y, area.y + area.height + int(PIXELS_PER_CHUNK/QUANTS_PER_PIXEL), int(PIXELS_PER_CHUNK*QUANTS_PER_PIXEL)):
-                sur.blit(
-                    self.getchunk(XY(ix, iy) // PIXELS_PER_CHUNK).image,
-                    (
-                        (ix - area.x - (area.x % PIXELS_PER_CHUNK)) / QUANTS_PER_PIXEL,
-                        (iy - area.y - (area.y % PIXELS_PER_CHUNK)) / QUANTS_PER_PIXEL
-                    )
-                )
-            
+    # Render a given area of tiles onto a camera's surface            
     def tocamera(self, cam):
         # ix, iy are chunk-coords
         c0 = (XY(cam.rect.topleft) / QUANTS_PER_CHUNK).intize()
@@ -122,10 +109,10 @@ class Tilemap:
                     ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL # QUANTS_PER_CHUNK
                 ).floor()
                 if self.go:
-                    print("tocamera from", ixy, " to ", scr_targetxy)
+                    pass
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
         if self.go:
-            print("\ ", cam.rect)
+            pass
         self.go = False
         
 

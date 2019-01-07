@@ -28,10 +28,6 @@ class Camera:
     def screentoworld(self, xy):
         return xy * QUANTS_PER_PIXEL + XY(self.rect.topleft)
         #return (xy + XY(self.rect.topleft)) * QUANTS_PER_PIXEL
-    
-    def render(self):
-        pass
         
-    def update(self):
+    def updateposition(self):
         self.rect.center = self.mov.center.totuple()
-        self.render()

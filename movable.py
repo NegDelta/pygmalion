@@ -67,15 +67,6 @@ class Movable:
     def get_rect(self):
         return pygame.Rect(self.left, self.top, self.size.x, self.size.y)
         
-    def render(self,area,sur):
-        pygame.draw.rect(sur, pygame.Color(0,0,255), self.get_rect)
-        '''sur.blit(
-            assets[self.spriteid],
-            (
-                self.left / QUANTS_PER_PIXEL - area.x,
-                self.top / QUANTS_PER_PIXEL - area.y
-            )
-        ) '''
     def tocamera(self,cam):
         pygame.draw.rect(
             cam.sur, pygame.Color(255,255,255),

@@ -10,10 +10,14 @@ from tiles import *
 from movable import *
 from camera import *
 
+# TODO: replace k with final position at which collision occurs
 def collide(p0, p1, eps, tmap):
+    # eps - epsilon
+    # p = x,y (0-1) -- current and target positions
     x0, y0 = p0.totuple()
     x1, y1 = p1.totuple()
     
+    # tx, ty (0-1) -- current and target tiles
     tx0, ty0 = gettilefrompt(p0, eps)
     tx1, ty1 = gettilefrompt(p1)    
     
@@ -166,25 +170,28 @@ while True:
     
     # points along the edges, just enough to have at least one on each tile
     # Edge cases would fit there just as well, but the less flops the better
+    # TODO: apparently these don't show up
     x_range = math.ceil(player.size.x / QUANTS_PER_TILE)
-    for i in range(1, x_range-1):
+    for i in range(1, x_range):
         ix = ipol(player.left, player.right, i/x_range)
         edges.append(XY(ix, player.top))
         edges.append(XY(ix, player.bottom))
         
     y_range = math.ceil(player.size.y / QUANTS_PER_TILE)
-    for i in range(1, y_range-1):
+    for i in range(1, y_range):
         iy = ipol(player.top, player.bottom, i/y_range)
         edges.append(XY(player.left,  iy))
         edges.append(XY(player.right, iy))
     
-    col_k = min(map(lambda edge : collide(
-        edge, edge + displace, player.eps, worldmap
-    ), edges))
+    col_k = min(map(
+        lambda edge : collide(
+            edge, edge + displace, player.eps, worldmap
+        ), edges
+    ))
     
     player.move(displace[0] * col_k, displace[1] * col_k)
     
-    camera.update()
+    camera.updateposition()
     worldmap.tocamera(camera)
     player.tocamera(camera)
     
