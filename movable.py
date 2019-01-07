@@ -1,3 +1,4 @@
+import pygame
 from gameglobals import *
 from enginemath import *
 
@@ -62,19 +63,27 @@ class Movable:
         self.bottom += dy
         self.moveepsx(dx)
         self.moveepsy(dy)
+    
+    def get_rect(self):
+        return pygame.Rect(self.left, self.top, self.size.x, self.size.y)
         
     def render(self,area,sur):
-        sur.blit(
+        pygame.draw.rect(sur, pygame.Color(0,0,255), self.get_rect)
+        '''sur.blit(
             assets[self.spriteid],
             (
                 self.left / QUANTS_PER_PIXEL - area.x,
                 self.top / QUANTS_PER_PIXEL - area.y
             )
-        ) 
+        ) '''
     def tocamera(self,cam):
-        cam.sur.blit(
+        pygame.draw.rect(
+            cam.sur, pygame.Color(255,255,255),
+            cam.rectworldtoscreen(self.get_rect())
+        )
+        '''cam.sur.blit(
             assets[self.spriteid],
             (
                 cam.worldtoscreen(XY(self.left, self.top)).totuple()
             )
-        )
+        )'''

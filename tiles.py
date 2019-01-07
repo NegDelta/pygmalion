@@ -36,6 +36,7 @@ class Chunk:
             self.contents.append([[self.default_id] * TILES_PER_CHUNK])
         self.contents[1][1] = 1
     def initgrund(self):
+        print('Generating chunk ', self.index) #
         if self.index.y < 0:
             self.contents = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         elif self.index.y > 0:
@@ -118,13 +119,13 @@ class Tilemap:
                 ixy = XY(ix, iy)
                 # point on screen where chunk is rendered
                 scr_targetxy = cam.worldtoscreen(
-                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL
+                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL # QUANTS_PER_CHUNK
                 ).floor()
                 if self.go:
-                    print(ixy, scr_targetxy)
+                    print("tocamera from", ixy, " to ", scr_targetxy)
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
         if self.go:
-            print(cam.rect)
+            print("\ ", cam.rect)
         self.go = False
         
 

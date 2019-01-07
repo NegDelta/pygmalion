@@ -3,7 +3,7 @@ import pygame
 import math # for collision code
 from pygame.locals import *
 
-#locals
+# locals
 from gameglobals import *
 from enginemath import *
 from tiles import *
@@ -66,6 +66,13 @@ def collide(p0, p1, eps, tmap):
 ####################### MAIN CODE BEGINS HERE #######
 
 # initialize globals
+print("TILES_PER_CHUNK =", TILES_PER_CHUNK)
+print("PIXELS_PER_TILE =", PIXELS_PER_TILE)
+print("QUANTS_PER_PIXEL =", QUANTS_PER_PIXEL)
+
+print("QUANTS_PER_TILE =", QUANTS_PER_TILE)
+print("PIXELS_PER_CHUNK =", PIXELS_PER_CHUNK)
+print("QUANTS_PER_CHUNK =", QUANTS_PER_CHUNK)
 
 # absolute dir the script is in, for relative paths
 script_dir = os.path.dirname(__file__)
@@ -89,6 +96,7 @@ worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(0.0, 0.0, 200, 200, 'marker')
+#player = Movable(0.0, 0.0, 5*QUANTS_PER_PIXEL, 5*QUANTS_PER_PIXEL, 'marker')
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
@@ -125,6 +133,7 @@ while True:
             # DEBUG space
             elif event.key == pygame.K_SPACE:
                 worldmap.go = True
+                print("You are now at ", player.get_rect())
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
@@ -142,17 +151,7 @@ while True:
                 
         # DEBUG
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print(repr(event))
-            mousexy = XY(event.pos)
-            viewxy = XY(view.center)
-            realxy = mousexy + viewxy
-            print('mousexy:', mousexy)
-            print('viewxy:', viewxy)
-            print('realxy:', realxy)
-            de_tile = gettilefrompt(realxy)
-            print('tile: ', de_tile)
-            print('type: ', worldmap.get(de_tile))
-            worldmap.t = True
+            pass
     
     displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
     

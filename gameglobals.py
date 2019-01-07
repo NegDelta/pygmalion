@@ -2,15 +2,15 @@ import numbers
 from enginemath import *
 
 
-QUANTS_PER_TILE = 256
-TILES_PER_CHUNK = 20
-PIXELS_PER_TILE = 17
+TILES_PER_CHUNK = 12
+PIXELS_PER_TILE = 16
+QUANTS_PER_PIXEL = 8
 
-QUANTS_PER_CHUNK = TILES_PER_CHUNK * QUANTS_PER_TILE
+QUANTS_PER_TILE = QUANTS_PER_PIXEL * PIXELS_PER_TILE # =8
 PIXELS_PER_CHUNK = TILES_PER_CHUNK * PIXELS_PER_TILE
-QUANTS_PER_PIXEL = QUANTS_PER_TILE / PIXELS_PER_TILE # =8
+QUANTS_PER_CHUNK = TILES_PER_CHUNK * QUANTS_PER_TILE
 
-SCROLL_SPEED = 75*16
+SCROLL_SPEED = 75*QUANTS_PER_PIXEL
 
 assets = {}
 tiles = {}
@@ -101,8 +101,8 @@ class XY:
         return self
     
     def floor(self):
-        self.x = floor(self.x)
-        self.y = floor(self.y)
+        self.x = int(floor(self.x))
+        self.y = int(floor(self.y))
         return self
 
     def xylen(self):
