@@ -117,8 +117,8 @@ class Tilemap:
         
 
 # Convert point XY with epsilon data to tile XY index
-def gettilefrompt(pt, eps=XY(0,0)):
+def gettilefrompt(pt):
     return [
-        int(pt[0] // QUANTS_PER_TILE - (eps[0] < 0 and pt[0] % QUANTS_PER_TILE == 0)),
-        int(pt[1] // QUANTS_PER_TILE - (eps[1] < 0 and pt[1] % QUANTS_PER_TILE == 0))
+        int(pt[0] // QUANTS_PER_TILE),
+        int(pt[1] // QUANTS_PER_TILE)
     ]

@@ -11,7 +11,7 @@ from movable import *
 from camera import *
 
 # TODO: replace k with final position at which collision occurs
-def collide(p0, p1, eps, tmap):
+def collide(p0, p1, tmap):
     # p = x,y (0-1) -- current and target positions
     borderxy = XY(getborder((p1-p0).x), getborder((p1-p0).y)) 
     #p0 -= borderxy
@@ -170,6 +170,7 @@ while True:
             pass
     
     displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
+    displace.intize()
     
     # collide
     edges = list()
@@ -197,7 +198,7 @@ while True:
     
     col_k = min(map(
         lambda edge : collide(
-            edge, edge + displace, player.eps, worldmap
+            edge, edge + displace, worldmap
         ), edges
     ))
     displace *= col_k
