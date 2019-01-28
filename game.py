@@ -12,17 +12,23 @@ from camera import *
 
 # TODO: replace k with final position at which collision occurs
 def collide(p0, p1, eps, tmap):
-    # eps - epsilon
     # p = x,y (0-1) -- current and target positions
+    borderxy = XY(getborder((p1-p0).x), getborder((p1-p0).y)) 
+    #p0 -= borderxy
+    #p1 -= borderxy
     x0, y0 = p0.totuple()
     x1, y1 = p1.totuple()
-    
     # tx, ty (0-1) -- current and target tiles
-    tx0, ty0 = gettilefrompt(p0, eps)
+    tx0, ty0 = gettilefrompt(p0)
     tx1, ty1 = gettilefrompt(p1)    
     
     # tiles to be checked for collision
     collisiontiles = []
+    terminalpos = {
+        'x': x1, 'y': y1, 'k': 1,
+        'tx': tx1,
+        'ty': ty1
+    }
     
     # ix,  iy  -- point coords
     # itx, ity -- tile  coords
@@ -30,42 +36,47 @@ def collide(p0, p1, eps, tmap):
     # collision from top/bottom
     if y1 != y0:
         for ity in range(ty0, ty1, sgn(y1-y0)):
-            iy = (ity + getborder(y1-y0)) * QUANTS_PER_TILE
+            iy = (ity + borderxy.y) * QUANTS_PER_TILE - borderxy.y
             k = rev_ipol(y0, y1, iy)
-            ix = ipol(x0, x1, k)
-            tx = gettilefrompt([ix,iy],eps)[0]
+            
+            ix = int(ipol(x0, x1, k))
+            tx = gettilefrompt([ix,iy])[0]
             ty = ity + sgn(y1-y0)
-            collisiontiles.append({
-                'x': ix, 'y': iy, 'k': k,
-                'tx': tx,
-                'ty': ty
-            })
+            
+            # if it's a colliding tile, we're done at this axis
+            if tiles[tmap.get(XY(tx,ty))].coll:
+                terminalpos = {
+                    'x': ix, 'y': iy, 'k': k,
+                    'tx': tx,
+                    'ty': ty
+                }
+                break
             
     # from left/right
     if x1 != x0:
         for itx in range(tx0, tx1, sgn(x1-x0)):
-            ix = (itx + getborder(x1-x0)) * QUANTS_PER_TILE
+            ix = (itx + borderxy.x) * QUANTS_PER_TILE - borderxy.x
             k = rev_ipol(x0, x1, ix)
-            iy = ipol(y0, y1, k)
+            # if it's collided earlier, we're done
+            if k > terminalpos['k']:
+                break
+            iy = int(ipol(y0, y1, k))
             tx = itx + sgn(x1-x0)
-            ty = gettilefrompt([ix,iy],eps)[1]
-            collisiontiles.append({
-                'x': ix, 'y': iy, 'k': k,
-                'tx': tx,
-                'ty': ty
-            })
+            ty = gettilefrompt([ix,iy])[1]
+            
+            # if it's a colliding tile, we're done
+            if tiles[tmap.get(XY(tx,ty))].coll:
+                terminalpos = {
+                    'x': ix, 'y': iy, 'k': k,
+                    'tx': tx,
+                    'ty': ty
+                }
+                break
     
-    # sort collisiontiles by k, i.e. order of getting hit
-    collisiontiles = sorted(collisiontiles, key = lambda x:x['k'])
-    
-    for itile in collisiontiles:
-        # check bordering tile for collision
-        if tiles[tmap.get(XY(itile['tx'],itile['ty']))].coll:
-            final_k = itile['k']
-            break
-    else:
-        final_k = 1
-    return final_k
+    if terminalpos['k'] < 1:
+        print("Collided at ", terminalpos)
+        print(" from {} to {}".format(p0,p1))
+    return terminalpos['k']
     
 ####################### MAIN CODE BEGINS HERE #######
 
@@ -99,7 +110,7 @@ tiles[1] = Tile('block', True)
 worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
-player = Movable(0.0, 0.0, 200, 200, 'marker')
+player = Movable(0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE, 'marker')
 #player = Movable(0.0, 0.0, 5*QUANTS_PER_PIXEL, 5*QUANTS_PER_PIXEL, 'marker')
 
 pygame.display.init()
@@ -114,7 +125,7 @@ pygame.display.flip()
 clk = pygame.time.Clock()
 
 while True:
-    displace = XY(0.0, 0.0)
+    displace = XY(0, 0)
     interval = clk.tick()
     markers = []
     for event in pygame.event.get():
@@ -137,7 +148,8 @@ while True:
             # DEBUG space
             elif event.key == pygame.K_SPACE:
                 worldmap.go = True
-                print("You are now at ", player.get_rect())
+                print("Your Xs: {} -- {}".format(player.left, player.right))
+                print("Your Ys: {} -- {}".format(player.top,  player.bottom))
             
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
@@ -163,33 +175,34 @@ while True:
     edges = list()
     
     # corners
-    edges.append(XY(player.left,  player.top))
-    edges.append(XY(player.left,  player.bottom))
-    edges.append(XY(player.right, player.top))
-    edges.append(XY(player.right, player.bottom))
+    edges.append(XY(player.left,    player.top))
+    edges.append(XY(player.left,    player.bottom-1))
+    edges.append(XY(player.right-1, player.top))
+    edges.append(XY(player.right-1, player.bottom-1))
     
     # points along the edges, just enough to have at least one on each tile
     # Edge cases would fit there just as well, but the less flops the better
     # TODO: apparently these don't show up
     x_range = math.ceil(player.size.x / QUANTS_PER_TILE)
     for i in range(1, x_range):
-        ix = ipol(player.left, player.right, i/x_range)
+        ix = int(ipol(player.left, player.right, i/x_range))
         edges.append(XY(ix, player.top))
-        edges.append(XY(ix, player.bottom))
+        edges.append(XY(ix, player.bottom-1))
         
     y_range = math.ceil(player.size.y / QUANTS_PER_TILE)
     for i in range(1, y_range):
-        iy = ipol(player.top, player.bottom, i/y_range)
-        edges.append(XY(player.left,  iy))
-        edges.append(XY(player.right, iy))
+        iy = int(ipol(player.top, player.bottom, i/y_range))
+        edges.append(XY(player.left,    iy))
+        edges.append(XY(player.right-1, iy))
     
     col_k = min(map(
         lambda edge : collide(
             edge, edge + displace, player.eps, worldmap
         ), edges
     ))
-    
-    player.move(displace[0] * col_k, displace[1] * col_k)
+    displace *= col_k
+    displace.intize()
+    player.move(displace.x, displace.y)
     
     camera.updateposition()
     worldmap.tocamera(camera)
