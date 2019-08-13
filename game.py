@@ -1,6 +1,7 @@
-import os,sys
+import os
+import sys
 import pygame
-import math # for collision code
+import math  # for collision code
 from pygame.locals import *
 
 # locals
@@ -10,20 +11,19 @@ from tiles import *
 from movable import *
 from camera import *
 
+
 # TODO: replace k with final position at which collision occurs
 def collide(p0, p1, tmap):
     # p = x,y (0-1) -- current and target positions
     borderxy = XY(getborder((p1-p0).x), getborder((p1-p0).y)) 
-    #p0 -= borderxy
-    #p1 -= borderxy
+    # p0 -= borderxy
+    # p1 -= borderxy
     x0, y0 = p0.totuple()
     x1, y1 = p1.totuple()
     # tx, ty (0-1) -- current and target tiles
     tx0, ty0 = gettilefrompt(p0)
     tx1, ty1 = gettilefrompt(p1)    
-    
-    # tiles to be checked for collision
-    collisiontiles = []
+
     terminalpos = {
         'x': x1, 'y': y1, 'k': 1,
         'tx': tx1,
@@ -40,11 +40,11 @@ def collide(p0, p1, tmap):
             k = rev_ipol(y0, y1, iy)
             
             ix = int(ipol(x0, x1, k))
-            tx = gettilefrompt([ix,iy])[0]
+            tx = gettilefrompt([ix, iy])[0]
             ty = ity + sgn(y1-y0)
             
             # if it's a colliding tile, we're done at this axis
-            if tiles[tmap.get(XY(tx,ty))].coll:
+            if tiles[tmap.get(XY(tx, ty))].coll:
                 terminalpos = {
                     'x': ix, 'y': iy, 'k': k,
                     'tx': tx,
@@ -62,10 +62,10 @@ def collide(p0, p1, tmap):
                 break
             iy = int(ipol(y0, y1, k))
             tx = itx + sgn(x1-x0)
-            ty = gettilefrompt([ix,iy])[1]
+            ty = gettilefrompt([ix, iy])[1]
             
             # if it's a colliding tile, we're done
-            if tiles[tmap.get(XY(tx,ty))].coll:
+            if tiles[tmap.get(XY(tx, ty))].coll:
                 terminalpos = {
                     'x': ix, 'y': iy, 'k': k,
                     'tx': tx,
@@ -75,10 +75,11 @@ def collide(p0, p1, tmap):
     
     if terminalpos['k'] < 1:
         print("Collided at ", terminalpos)
-        print(" from {} to {}".format(p0,p1))
+        print(" from {} to {}".format(p0, p1))
     return terminalpos['k']
     
-####################### MAIN CODE BEGINS HERE #######
+# MAIN CODE BEGINS HERE #######
+
 
 # initialize globals
 print("TILES_PER_CHUNK =", TILES_PER_CHUNK)
@@ -94,15 +95,11 @@ script_dir = os.path.dirname(__file__)
 
 pygame.init()
 
-#load assets
-assets['block'] = pygame.image.load\
-                  (os.path.join(script_dir, 'assets', 'block.png'))
-assets['sky'] = pygame.image.load\
-                  (os.path.join(script_dir, 'assets', 'sky.png'))
-assets['marker'] = pygame.image.load\
-                  (os.path.join(script_dir, 'assets', 'marker.png'))
-assets['marker-w'] = pygame.image.load\
-                  (os.path.join(script_dir, 'assets', 'marker-w.png'))
+# load assets
+assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.png'))
+assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
+assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
+assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
 tiles[0] = Tile('sky', False)
 tiles[1] = Tile('block', True)
 
@@ -111,7 +108,7 @@ worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE, 'marker')
-#player = Movable(0.0, 0.0, 5*QUANTS_PER_PIXEL, 5*QUANTS_PER_PIXEL, 'marker')
+# player = Movable(0.0, 0.0, 5*QUANTS_PER_PIXEL, 5*QUANTS_PER_PIXEL, 'marker')
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
@@ -137,13 +134,13 @@ while True:
             # TODO: relegate to Controls or MoveMech
             # arrow keys - add movement
             if event.key == pygame.K_LEFT:
-                player.velo = diradd(player.velo,[-1, 0])
+                player.velo = diradd(player.velo, [-1, 0])
             if event.key == pygame.K_DOWN:
-                player.velo = diradd(player.velo,[ 0, 1])
+                player.velo = diradd(player.velo, [0, 1])
             if event.key == pygame.K_UP:
-                player.velo = diradd(player.velo,[ 0,-1])
+                player.velo = diradd(player.velo, [0, -1])
             if event.key == pygame.K_RIGHT:
-                player.velo = diradd(player.velo,[ 1, 0])
+                player.velo = diradd(player.velo, [1, 0])
             
             # DEBUG space
             elif event.key == pygame.K_SPACE:
@@ -157,13 +154,13 @@ while True:
         elif event.type == pygame.KEYUP:
             # TODO: relegate to Controls or MoveMech
             if event.key == pygame.K_LEFT:
-                player.velo = dirsub(player.velo,[-1, 0])
+                player.velo = dirsub(player.velo, [-1, 0])
             if event.key == pygame.K_DOWN:
-                player.velo = dirsub(player.velo,[ 0, 1])
+                player.velo = dirsub(player.velo, [0, 1])
             if event.key == pygame.K_UP:
-                player.velo = dirsub(player.velo,[ 0,-1])
+                player.velo = dirsub(player.velo, [0, -1])
             if event.key == pygame.K_RIGHT:
-                player.velo = dirsub(player.velo,[ 1, 0])
+                player.velo = dirsub(player.velo, [1, 0])
                 
         # DEBUG
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -197,7 +194,7 @@ while True:
         edges.append(XY(player.right-1, iy))
     
     col_k = min(map(
-        lambda edge : collide(
+        lambda edge: collide(
             edge, edge + displace, worldmap
         ), edges
     ))
@@ -211,4 +208,4 @@ while True:
     
     pygame.display.flip()
 
-#and then close the whole thing
+# and then close the whole thing
