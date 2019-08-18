@@ -1,13 +1,13 @@
 import os
 import sys
-import pygame
+# import pygame
 import math  # for collision code
-from pygame.locals import *
+# from pygame.locals import *
 
 # locals
-from gameglobals import *
-from enginemath import *
-from tiles import *
+# from gameglobals import *
+# from enginemath import *
+# from tiles import *
 from movable import *
 from camera import *
 

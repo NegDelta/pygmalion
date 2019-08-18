@@ -1,6 +1,5 @@
-import numbers
 from enginemath import *
-
+import numbers
 
 TILES_PER_CHUNK = 12
 PIXELS_PER_TILE = 16
@@ -10,29 +9,28 @@ QUANTS_PER_TILE = QUANTS_PER_PIXEL * PIXELS_PER_TILE
 PIXELS_PER_CHUNK = TILES_PER_CHUNK * PIXELS_PER_TILE
 QUANTS_PER_CHUNK = TILES_PER_CHUNK * QUANTS_PER_TILE
 
-SCROLL_SPEED = 75*QUANTS_PER_PIXEL
+SCROLL_SPEED = 75 * QUANTS_PER_PIXEL
 
 assets = {}
 tiles = {}
 
 
 class XY:
-    # TODO: fix init cases
     def __init__(self, _x=0, _y=0):
-        try:  # try to initialize from iterable
-            # noinspection PyTypeChecker
-            xlist = list(_x)
-            if len(xlist) >= 2:
-                self.x = xlist[0]
-                self.y = xlist[1]
-                return
-            raise TypeError
+        try:
+            xlist = _x
+            if len(xlist) < 2:
+                xlist += [0, 0]
+            _x = xlist[0]
+            _y = xlist[1]
         except TypeError:
-            if (not isinstance(_x, numbers.Number)) or \
-                    (not isinstance(_y, numbers.Number)):
-                raise TypeError('XY: Not a number ({}, {})'.format(_x, _y))
-            self.x = _x
-            self.y = _y
+            pass
+
+        if (not isinstance(_x, numbers.Number)) or \
+                (not isinstance(_y, numbers.Number)):
+            raise TypeError('XY: Not an int ({}, {})'.format(_x, _y))
+        self.x = int(_x)
+        self.y = int(_y)
 
     def __repr__(self):
         return '<XY({}, {})>'.format(self.x, self.y)

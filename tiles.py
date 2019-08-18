@@ -2,20 +2,21 @@ import pygame
 import random
 from gameglobals import *
 
+
 # TODO: add support for partial initialization
 class Chunk:
     default_id = 0
     
-    def __init__ (self, _index):
+    def __init__(self, _index):
         self.index = _index
-        self.initmap()
+        self.contents = self.initmap()
         self.image = pygame.Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
         
         for ix in range(0, TILES_PER_CHUNK):
             for iy in range(0, TILES_PER_CHUNK):
                 try:
                     self.image.blit(
-                        tiles[self.get(XY(ix,iy))].sprite, # sprite in tile i
+                        tiles[self.get(XY(ix, iy))].sprite,  # sprite in tile i
                         (
                             ix * QUANTS_PER_TILE / QUANTS_PER_PIXEL,
                             iy * QUANTS_PER_TILE / QUANTS_PER_PIXEL
@@ -26,43 +27,48 @@ class Chunk:
                     raise
                     
     def initmap(self):
-        self.initgrund()
+        return self.initgrund()
     
     # Generators. TODO: isolate or move to main
     def initbaka(self):
-        print('Generating chunk ', self.index) #
-        self.contents = []
+        print('Generating chunk ', self.index)
+        acc = []
         for i in range(0, TILES_PER_CHUNK):
-            self.contents.append([[self.default_id] * TILES_PER_CHUNK])
-        self.contents[1][1] = 1
+            acc.append([[self.default_id] * TILES_PER_CHUNK])
+        acc[1][1] = 1
+        return acc
+
     def initgrund(self):
-        print('Generating chunk ', self.index) #
+        print('Generating chunk ', self.index)
         if self.index.y < 0:
-            self.contents = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+            acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         elif self.index.y > 0:
-            self.contents = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+            acc = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         else:
-            self.contents = []
+            acc = []
             for i in range(0, TILES_PER_CHUNK):
-                self.contents.append([])
+                acc.append([])
                 for j in range(0, TILES_PER_CHUNK):
                     if j / TILES_PER_CHUNK > random.random():
-                        self.contents[i].append(1)
+                        acc[i].append(1)
                     else:
-                        self.contents[i].append(0)
+                        acc[i].append(0)
+        return acc
     
     # Get/Set tiletype from within chunk
     def get(self, _tindex):
         return self.contents[_tindex.x][_tindex.y]
+
     def set_to(self, _tindex, val):
         self.contents[_tindex.x][_tindex.y] = val
         self.image.blit(
-            tiles[self.get(_tindex)].sprite, # sprite in tile _tindex
+            tiles[self.get(_tindex)].sprite,  # sprite in tile _tindex
             (
                 _tindex.x * QUANTS_PER_TILE,
                 _tindex.y * QUANTS_PER_TILE
             )
         )
+
 
 # This class stores info on TYPE, not any particular tile
 class Tile:
@@ -70,6 +76,7 @@ class Tile:
         self.name = _name           # Name, doubling as sprite index
         self.sprite = assets[_name]
         self.coll = _coll           # Physical properties
+
 
 class Tilemap:
     def __init__(self):
@@ -83,12 +90,13 @@ class Tilemap:
         cindex = _tindex // TILES_PER_CHUNK
         tindex = _tindex % TILES_PER_CHUNK
         return self.getchunk(cindex).get(tindex)
+
     def set_to(self, _tindex, val):
         if type(_tindex) != XY:
             _tindex = XY(_tindex)
         cindex = _tindex // TILES_PER_CHUNK
         tindex = _tindex % TILES_PER_CHUNK
-        self.getchunk(cindex).set_to(tindex,val)
+        self.getchunk(cindex).set_to(tindex, val)
     
     # Get a single chunk from within a tilemap
     def getchunk(self, _cindex):
@@ -106,7 +114,7 @@ class Tilemap:
                 ixy = XY(ix, iy)
                 # point on screen where chunk is rendered
                 scr_targetxy = cam.worldtoscreen(
-                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL # QUANTS_PER_CHUNK
+                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL  # QUANTS_PER_CHUNK
                 ).floor()
                 if self.go:
                     pass
