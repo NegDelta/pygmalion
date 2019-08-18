@@ -1,4 +1,6 @@
 from tiles import *
+from enginemath import XY
+import pygame
 
 
 # TODO: isolate stuck-to-player camera as subclass
@@ -16,17 +18,17 @@ class Camera:
     
     # Convert between in-world and on-screen coordinates
     
-    def worldtoscreen(self, xy):
+    def worldtoscreen(self, xy: XY) -> XY:
         return (xy - XY(self.rect.topleft)) / QUANTS_PER_PIXEL
         
-    def rectworldtoscreen(self, r):
+    def rectworldtoscreen(self, r: pygame.Rect) -> pygame.Rect:
         acc = r.copy()
         acc.width, acc.height = acc.width/QUANTS_PER_PIXEL, acc.height/QUANTS_PER_PIXEL
         acc.topleft = self.worldtoscreen(XY(r.topleft)).totuple()
         return acc
         # return xy / QUANTS_PER_PIXEL - XY(self.rect.topleft)
         
-    def screentoworld(self, xy):
+    def screentoworld(self, xy: XY) -> XY:
         return xy * QUANTS_PER_PIXEL + XY(self.rect.topleft)
         # return (xy + XY(self.rect.topleft)) * QUANTS_PER_PIXEL
         

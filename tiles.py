@@ -1,6 +1,8 @@
 import pygame
 import random
 from gameglobals import *
+from enginemath import XY
+from typing import List
 
 
 # TODO: add support for partial initialization
@@ -26,11 +28,15 @@ class Chunk:
                     print(self.contents[ix])
                     raise
                     
-    def initmap(self):
+    def initmap(self) -> List[List[int]]:
         return self.initgrund()
     
     # Generators. TODO: isolate or move to main
-    def initbaka(self):
+    def initbaka(self) -> List[List[int]]:
+        """
+        Generates an "empty" chunk filled with default_id.
+        :return: a 2d array of chunk contents
+        """
         print('Generating chunk ', self.index)
         acc = []
         for i in range(0, TILES_PER_CHUNK):
@@ -38,7 +44,7 @@ class Chunk:
         acc[1][1] = 1
         return acc
 
-    def initgrund(self):
+    def initgrund(self) -> List[List[int]]:
         print('Generating chunk ', self.index)
         if self.index.y < 0:
             acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
@@ -72,13 +78,20 @@ class Chunk:
 
 # This class stores info on TYPE, not any particular tile
 class Tile:
-    def __init__(self, _name, _coll):
-        self.name = _name           # Name, doubling as sprite index
+    def __init__(self, _name: str, _coll: bool):
+        """
+        :param _name: Identifier, also filename for sprites
+        :param _coll: Whether collisions occur
+        """
+        self.name = _name
         self.sprite = assets[_name]
-        self.coll = _coll           # Physical properties
+        self.coll = _coll
 
 
 class Tilemap:
+    chunks: dict
+    go: bool
+
     def __init__(self):
         self.chunks = {}
         self.go = False

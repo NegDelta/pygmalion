@@ -14,6 +14,7 @@ from camera import *
 
 # TODO: replace k with final position at which collision occurs
 def collide(p0, p1, tmap):
+    """Calculate the point at which movement between two points stops."""
     # p = x,y (0-1) -- current and target positions
     borderxy = XY(getborder((p1-p0).x), getborder((p1-p0).y)) 
     # p0 -= borderxy
@@ -36,17 +37,17 @@ def collide(p0, p1, tmap):
     # collision from top/bottom
     if y1 != y0:
         for ity in range(ty0, ty1, sgn(y1-y0)):
-            iy = (ity + borderxy.y) * QUANTS_PER_TILE - borderxy.y
-            k = rev_ipol(y0, y1, iy)
+            y_iy = (ity + borderxy.y) * QUANTS_PER_TILE - borderxy.y
+            k = rev_ipol(y0, y1, y_iy)
             
-            ix = int(ipol(x0, x1, k))
-            tx = gettilefrompt([ix, iy])[0]
+            y_ix = int(ipol(x0, x1, k))
+            tx = gettilefrompt([y_ix, y_iy])[0]
             ty = ity + sgn(y1-y0)
             
             # if it's a colliding tile, we're done at this axis
             if tiles[tmap.get(XY(tx, ty))].coll:
                 terminalpos = {
-                    'x': ix, 'y': iy, 'k': k,
+                    'x': y_ix, 'y': y_iy, 'k': k,
                     'tx': tx,
                     'ty': ty
                 }
@@ -55,19 +56,19 @@ def collide(p0, p1, tmap):
     # from left/right
     if x1 != x0:
         for itx in range(tx0, tx1, sgn(x1-x0)):
-            ix = (itx + borderxy.x) * QUANTS_PER_TILE - borderxy.x
-            k = rev_ipol(x0, x1, ix)
+            x_ix = (itx + borderxy.x) * QUANTS_PER_TILE - borderxy.x
+            k = rev_ipol(x0, x1, x_ix)
             # if it's collided earlier, we're done
             if k > terminalpos['k']:
                 break
-            iy = int(ipol(y0, y1, k))
+            x_iy = int(ipol(y0, y1, k))
             tx = itx + sgn(x1-x0)
-            ty = gettilefrompt([ix, iy])[1]
+            ty = gettilefrompt([x_ix, x_iy])[1]
             
             # if it's a colliding tile, we're done
             if tiles[tmap.get(XY(tx, ty))].coll:
                 terminalpos = {
-                    'x': ix, 'y': iy, 'k': k,
+                    'x': x_ix, 'y': x_iy, 'k': k,
                     'tx': tx,
                     'ty': ty
                 }

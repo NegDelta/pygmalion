@@ -1,6 +1,6 @@
 import pygame
-from gameglobals import *
-# from enginemath import *
+# from gameglobals import *
+from enginemath import *
 
 
 # TODO: rewrite to allow XY arguments
