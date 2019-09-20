@@ -5,7 +5,6 @@ from enginemath import XY
 from typing import List
 
 
-# TODO: add support for partial initialization
 class Chunk:
     default_id = 0
     
@@ -29,22 +28,6 @@ class Chunk:
                     raise
                     
     def initmap(self) -> List[List[int]]:
-        return self.initgrund()
-    
-    # Generators. TODO: isolate or move to main
-    def initbaka(self) -> List[List[int]]:
-        """
-        Generates an "empty" chunk filled with default_id.
-        :return: a 2d array of chunk contents
-        """
-        print('Generating chunk ', self.index)
-        acc = []
-        for i in range(0, TILES_PER_CHUNK):
-            acc.append([[self.default_id] * TILES_PER_CHUNK])
-        acc[1][1] = 1
-        return acc
-
-    def initgrund(self) -> List[List[int]]:
         print('Generating chunk ', self.index)
         if self.index.y < 0:
             acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
@@ -90,11 +73,9 @@ class Tile:
 
 class Tilemap:
     chunks: dict
-    go: bool
 
     def __init__(self):
         self.chunks = {}
-        self.go = False
     
     # Get/Set tiletype of a single tile from within a tilemap
     def get(self, _tindex):
@@ -129,12 +110,7 @@ class Tilemap:
                 scr_targetxy = cam.worldtoscreen(
                     ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL  # QUANTS_PER_CHUNK
                 ).floor()
-                if self.go:
-                    pass
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
-        if self.go:
-            pass
-        self.go = False
         
 
 # Convert point XY with epsilon data to tile XY index
