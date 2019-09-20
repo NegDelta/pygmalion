@@ -1,14 +1,16 @@
 from tiles import *
 from enginemath import XY
+# from movable import Movable
 import pygame
 
 
-# TODO: isolate stuck-to-player camera as subclass
 class Camera:
-    def __init__(self, _sur, _mov):
+    def __init__(self, _sur: pygame.Surface):
+        """
+        :param _sur: Surface the camera renders to
+        """
         self.sur = _sur
         self.sur.fill(pygame.Color("blue"))
-        self.mov = _mov
 
         # rect in world coordinates
         self.rect = _sur.get_rect()
@@ -31,4 +33,4 @@ class Camera:
         return xy * QUANTS_PER_PIXEL + XY(self.rect.left, self.rect.top)
 
     def updateposition(self):
-        self.rect.center = self.mov.center.totuple()
+        pass
