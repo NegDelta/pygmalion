@@ -5,7 +5,6 @@ from enginemath import XY
 from typing import List
 
 
-# TODO: add support for partial initialization
 class Chunk:
     default_id = 0
     
@@ -29,22 +28,6 @@ class Chunk:
                     raise
                     
     def initmap(self) -> List[List[int]]:
-        return self.initgrund()
-    
-    # Generators. TODO: isolate or move to main
-    def initbaka(self) -> List[List[int]]:
-        """
-        Generates an "empty" chunk filled with default_id.
-        :return: a 2d array of chunk contents
-        """
-        print('Generating chunk ', self.index)
-        acc = []
-        for i in range(0, TILES_PER_CHUNK):
-            acc.append([[self.default_id] * TILES_PER_CHUNK])
-        acc[1][1] = 1
-        return acc
-
-    def initgrund(self) -> List[List[int]]:
         print('Generating chunk ', self.index)
         if self.index.y < 0:
             acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
@@ -90,23 +73,21 @@ class Tile:
 
 class Tilemap:
     chunks: dict
-    go: bool
 
     def __init__(self):
         self.chunks = {}
-        self.go = False
     
     # Get/Set tiletype of a single tile from within a tilemap
     def get(self, _tindex):
         if type(_tindex) != XY:
-            _tindex = XY(_tindex)
+            _tindex = XY(_tindex[0], _tindex[1])
         cindex = _tindex // TILES_PER_CHUNK
         tindex = _tindex % TILES_PER_CHUNK
         return self.getchunk(cindex).get(tindex)
 
     def set_to(self, _tindex, val):
         if type(_tindex) != XY:
-            _tindex = XY(_tindex)
+            _tindex = XY(_tindex[0], _tindex[1])
         cindex = _tindex // TILES_PER_CHUNK
         tindex = _tindex % TILES_PER_CHUNK
         self.getchunk(cindex).set_to(tindex, val)
@@ -120,8 +101,8 @@ class Tilemap:
     # Render a given area of tiles onto a camera's surface            
     def tocamera(self, cam):
         # ix, iy are chunk-coords
-        c0 = (XY(cam.rect.topleft) / QUANTS_PER_CHUNK).intize()
-        c1 = (XY(cam.rect.bottomright) / QUANTS_PER_CHUNK).intize()
+        c0 = (XY(cam.rect.left, cam.rect.top) / QUANTS_PER_CHUNK).intize()
+        c1 = (XY(cam.rect.right, cam.rect.bottom) / QUANTS_PER_CHUNK).intize()
         for ix in range(c0.x - 1, c1.x + 1):
             for iy in range(c0.y - 1, c1.y + 1):
                 ixy = XY(ix, iy)
@@ -129,12 +110,7 @@ class Tilemap:
                 scr_targetxy = cam.worldtoscreen(
                     ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL  # QUANTS_PER_CHUNK
                 ).floor()
-                if self.go:
-                    pass
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
-        if self.go:
-            pass
-        self.go = False
         
 
 # Convert point XY with epsilon data to tile XY index
