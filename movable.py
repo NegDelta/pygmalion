@@ -6,15 +6,21 @@ from tiles import *
 from camera import Camera
 
 
-# TODO: rewrite to allow XY arguments
+# TODO: rewrite to allow XY arguments using kwargs
 class Movable:
-    def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0):
-        self.left = _x
-        self.top = _y
-        self.right = _x + _w
-        self.bottom = _y + _h
+    def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0, xy: XY = None, size: XY = None):
+        if xy:
+            self.left, self.top = xy.x, xy.y
+        else:
+            self.left = _x
+            self.top = _y
+        if size:
+            self.size = size
+        else:
+            self.size = XY(_w, _h)
+        self.right = self.left + self.size.x
+        self.bottom = self.top + self.size.y
         self.center = XY(_x, _y)
-        self.size = XY(_w, _h)
         self.spriteid = _spriteid
         self.weight = _weight
         self.velo = XY(0, 0)
