@@ -58,9 +58,14 @@ class XY:
     x: numbers.Real
     y: numbers.Real
 
-    def __init__(self, _x: numbers.Real, _y: numbers.Real):
-        self.x = _x
-        self.y = _y
+    # TODO [NOW/2]: replace with *args to allow init from single XY
+    def __init__(self, *args):
+        if len(args) == 1:  # XY
+            self.x, self.y = args[0]
+        elif len(args) == 2:  # Number, Number
+            self.x, self.y = args
+        else:
+            raise SyntaxError("Wrong number of arguments")
 
     def __repr__(self):
         return '<XY({}, {})>'.format(self.x, self.y)

@@ -6,23 +6,34 @@ from tiles import *
 from camera import Camera
 
 
-# TODO: rewrite to allow XY arguments using kwargs
 class Movable:
-    def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0, xy: XY = None, size: XY = None):
-        if xy:
-            self.left, self.top = xy.x, xy.y
+    def __init__(self, *args):
+        """
+        Initializes Movable based on number of args
+            x,y, w,h, spriteid, weight (6 args)
+            xy: XY, wh: XY, spriteid, weight (4 args)
+        :param args:
+        """
+        if len(args) == 6:  # Number, Number. Number, Number, ...
+            top, left, w, h, spriteid, weight = args
+            size = XY(w, h)
+        elif len(args) == 4:  # XY, XY, ...
+            topleft, size, spriteid, weight = args
+            top, left = topleft
         else:
-            self.left = _x
-            self.top = _y
-        if size:
-            self.size = size
-        else:
-            self.size = XY(_w, _h)
+            if len(args) == 5:
+                errmsg = "Unclear arguments"
+            else:
+                errmsg = "Wrong number of arguments"
+            raise SyntaxError(errmsg)
+        self.left = left
+        self.top = top
+        self.size = size
         self.right = self.left + self.size.x
         self.bottom = self.top + self.size.y
-        self.center = XY(_x, _y)
-        self.spriteid = _spriteid
-        self.weight = _weight
+        self.center = XY(top, left) + self.size/2
+        self.spriteid = spriteid
+        self.weight = weight
         self.velo = XY(0, 0)
 
     # Motion methods, akin to pygame.Rect
