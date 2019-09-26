@@ -6,17 +6,44 @@ from tiles import *
 from camera import Camera
 
 
-# TODO: rewrite to allow XY arguments
 class Movable:
-    def __init__(self, _x, _y, _w, _h, _spriteid, _weight=0):
-        self.left = _x
-        self.top = _y
-        self.right = _x + _w
-        self.bottom = _y + _h
-        self.center = XY(_x, _y)
-        self.size = XY(_w, _h)
-        self.spriteid = _spriteid
-        self.weight = _weight
+    def __init__(self, *args):
+        """
+        Initializes Movable based on number of args
+            x,y, w,h, spriteid, weight (6 args)
+            xy: XY, wh: XY, spriteid, weight (4 args)
+        :param args:
+        """
+        size = None
+        spriteid, weight = args[-2:]
+        coords = args[:-2]
+        if len(coords) == 4:  # Number, Number. Number, Number
+            top, left, w, h = coords
+            size = XY(w, h)
+        elif len(coords) == 2:  # XY, XY
+            topleft, size = coords
+            top, left = topleft
+        elif len(coords) == 3:
+            if type(coords[1]) == XY:
+                raise SyntaxError("Too many coordinates")
+            else:
+                if type(coords[0]) == XY and type(coords[2]) != XY:  # XY, Num, Num
+                    topleft, w, h = coords
+                    top, left = topleft
+                elif type(coords[0]) != XY and type(coords[2]) == XY:  # Num, Num, XY
+                    top, left, size = coords
+                else:  # Num, Num, Num
+                    raise SyntaxError("Not enough arguments")
+        else:
+            raise SyntaxError("Wrong number of arguments")
+        self.left = left
+        self.top = top
+        self.size = size
+        self.right = self.left + self.size.x
+        self.bottom = self.top + self.size.y
+        self.center = XY(top, left) + self.size/2
+        self.spriteid = spriteid
+        self.weight = weight
         self.velo = XY(0, 0)
 
     # Motion methods, akin to pygame.Rect
@@ -172,7 +199,7 @@ class Movable:
         ))
         d *= col_k
         d.intize()
-        
+
         return d
 
 

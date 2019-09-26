@@ -1,5 +1,4 @@
 import numbers
-from typing import List, cast
 
 
 # Sign fn
@@ -58,23 +57,14 @@ def getborder(dirv) -> int:
 class XY:
     x: numbers.Real
     y: numbers.Real
-    xlist: List
 
-    def __init__(self, _x=0, _y=0):
-        try:
-            xlist = cast(List, _x)
-            if len(xlist) < 2:
-                xlist += [0, 0]
-            _x = xlist[0]
-            _y = xlist[1]
-        except TypeError:
-            pass
-
-        if (not isinstance(_x, numbers.Real)) or \
-                (not isinstance(_y, numbers.Real)):
-            raise TypeError('XY: Not an int ({}, {})'.format(_x, _y))
-        self.x = _x
-        self.y = _y
+    def __init__(self, *args):
+        if len(args) == 1:  # XY
+            self.x, self.y = args[0]
+        elif len(args) == 2:  # Number, Number
+            self.x, self.y = args
+        else:
+            raise SyntaxError("Wrong number of arguments")
 
     def __repr__(self):
         return '<XY({}, {})>'.format(self.x, self.y)

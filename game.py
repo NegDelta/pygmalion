@@ -41,7 +41,7 @@ tiles[1] = Tile('block', True)
 worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
-player = Movable(0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE, 'marker')
+player = Movable(0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE, 'marker', None)
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
@@ -60,43 +60,36 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+        
         # keypresses
         elif event.type == pygame.KEYDOWN:
-            # TODO: switch to polling arrow keys
-            # arrow keys - add movement
-            if event.key == pygame.K_LEFT:
-                player.velo = diradd(player.velo, [-1, 0])
-            if event.key == pygame.K_DOWN:
-                player.velo = diradd(player.velo, [0, 1])
-            if event.key == pygame.K_UP:
-                player.velo = diradd(player.velo, [0, -1])
-            if event.key == pygame.K_RIGHT:
-                player.velo = diradd(player.velo, [1, 0])
 
             # DEBUG space
-            elif event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE:
                 worldmap.go = True
                 print("Your Xs: {} -- {}".format(player.left, player.right))
                 print("Your Ys: {} -- {}".format(player.top,  player.bottom))
 
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
-
-        # TODO: switch to polling arrow keys
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
-                player.velo = dirsub(player.velo, [-1, 0])
-            if event.key == pygame.K_DOWN:
-                player.velo = dirsub(player.velo, [0, 1])
-            if event.key == pygame.K_UP:
-                player.velo = dirsub(player.velo, [0, -1])
-            if event.key == pygame.K_RIGHT:
-                player.velo = dirsub(player.velo, [1, 0])
                 
         # DEBUG
         elif event.type == pygame.MOUSEBUTTONDOWN:
             pass
-    
+
+    # poll arrow keys for movement
+    pressed_keys = pygame.key.get_pressed()
+    new_velo = XY(0, 0)
+    if pressed_keys[pygame.K_LEFT]:
+        new_velo += XY(-1, 0)
+    if pressed_keys[pygame.K_DOWN]:
+        new_velo += XY(0, 1)
+    if pressed_keys[pygame.K_UP]:
+        new_velo += XY(0, -1)
+    if pressed_keys[pygame.K_RIGHT]:
+        new_velo += XY(1, 0)
+    player.velo = new_velo
+
     displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
     displace.intize()
     
@@ -104,7 +97,7 @@ while True:
     col_displace = player.get_collision(worldmap, displace)
 
     player.move(col_displace.x, col_displace.y)
-    
+
     camera.updateposition()
     worldmap.tocamera(camera)
     player.tocamera(camera)
