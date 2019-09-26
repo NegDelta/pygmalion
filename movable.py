@@ -14,18 +14,28 @@ class Movable:
             xy: XY, wh: XY, spriteid, weight (4 args)
         :param args:
         """
-        if len(args) == 6:  # Number, Number. Number, Number, ...
-            top, left, w, h, spriteid, weight = args
+        size = None
+        spriteid, weight = args[-2:]
+        coords = args[:-2]
+        if len(coords) == 4:  # Number, Number. Number, Number
+            top, left, w, h = coords
             size = XY(w, h)
-        elif len(args) == 4:  # XY, XY, ...
-            topleft, size, spriteid, weight = args
+        elif len(coords) == 2:  # XY, XY
+            topleft, size = coords
             top, left = topleft
-        else:
-            if len(args) == 5:
-                errmsg = "Unclear arguments"
+        elif len(coords) == 3:
+            if type(coords[1]) == XY:
+                raise SyntaxError("Too many coordinates")
             else:
-                errmsg = "Wrong number of arguments"
-            raise SyntaxError(errmsg)
+                if type(coords[0]) == XY and type(coords[2]) != XY:  # XY, Num, Num
+                    topleft, w, h = coords
+                    top, left = topleft
+                elif type(coords[0]) != XY and type(coords[2]) == XY:  # Num, Num, XY
+                    top, left, size = coords
+                else:  # Num, Num, Num
+                    raise SyntaxError("Not enough arguments")
+        else:
+            raise SyntaxError("Wrong number of arguments")
         self.left = left
         self.top = top
         self.size = size

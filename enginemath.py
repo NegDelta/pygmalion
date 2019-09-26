@@ -58,7 +58,6 @@ class XY:
     x: numbers.Real
     y: numbers.Real
 
-    # TODO [NOW/2]: replace with *args to allow init from single XY
     def __init__(self, *args):
         if len(args) == 1:  # XY
             self.x, self.y = args[0]
