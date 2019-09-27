@@ -41,7 +41,7 @@ tiles[1] = Tile('block', True)
 worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
-player = Movable(0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE, 'marker', None)
+player = Movable((0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE), spriteid='marker', mapvelo=SCROLL_SPEED/1000, weight=None)
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
@@ -55,7 +55,6 @@ pygame.display.flip()
 clk = pygame.time.Clock()
 
 while True:
-    displace = XY(0, 0)  # of the player, TODO: move to Movable
     interval = clk.tick()  # how much time elapsed since last frame
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -90,13 +89,8 @@ while True:
         new_velo += XY(1, 0)
     player.velo = new_velo
 
-    displace += unitize(player.velo, SCROLL_SPEED * interval/1000)
-    displace.intize()
-    
-    # collide
-    col_displace = player.get_collision(worldmap, displace)
-
-    player.move(col_displace.x, col_displace.y)
+    displace = player.get_collided_displace(SCROLL_SPEED * interval/1000, worldmap)
+    player.move(displace)
 
     camera.updateposition()
     worldmap.tocamera(camera)

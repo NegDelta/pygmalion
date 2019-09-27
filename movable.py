@@ -7,16 +7,9 @@ from camera import Camera
 
 
 class Movable:
-    def __init__(self, *args):
-        """
-        Initializes Movable based on number of args
-            x,y, w,h, spriteid, weight (6 args)
-            xy: XY, wh: XY, spriteid, weight (4 args)
-        :param args:
-        """
-        size = None
-        spriteid, weight = args[-2:]
-        coords = args[:-2]
+    def __init__(self, coords, spriteid, weight, mapvelo):
+        size = XY()
+
         if len(coords) == 4:  # Number, Number. Number, Number
             top, left, w, h = coords
             size = XY(w, h)
@@ -44,7 +37,8 @@ class Movable:
         self.center = XY(top, left) + self.size/2
         self.spriteid = spriteid
         self.weight = weight
-        self.velo = XY(0, 0)
+        self.velo = XY()
+        self.mapvelo = mapvelo
 
     # Motion methods, akin to pygame.Rect
     
@@ -72,16 +66,26 @@ class Movable:
         self.bottom += d
         self.center.y += d
  
-    def move(self, dx, dy):
-        self.center.x += dx
-        self.center.y += dy
-        self.left += dx
-        self.top += dy
-        self.right += dx
-        self.bottom += dy
+    def move(self, d: XY):
+        self.center.x += d.x
+        self.center.y += d.y
+        self.left += d.x
+        self.top += d.y
+        self.right += d.x
+        self.bottom += d.y
     
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         return pygame.Rect(self.left, self.top, self.size.x, self.size.y)
+
+    def get_raw_displace(self, dt) -> XY:
+        acc = XY(self.velo)
+        acc = acc.unitize(dt).intize()
+        return acc
+
+    def get_collided_displace(self, dt, tmap: Tilemap) -> XY:
+        acc = self.get_raw_displace(dt)
+        acc = self.get_collision(tmap, acc)
+        return acc
         
     def tocamera(self, cam):
         """

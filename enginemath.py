@@ -63,6 +63,8 @@ class XY:
             self.x, self.y = args[0]
         elif len(args) == 2:  # Number, Number
             self.x, self.y = args
+        elif len(args) == 0:
+            self.x, self.y = 0, 0
         else:
             raise SyntaxError("Wrong number of arguments")
 
@@ -153,11 +155,10 @@ class XY:
     def xylen(self):
         return (self.x**2 + self.y**2) ** 0.5
 
-
-# Return vector of same direction but of given length
-def unitize(v: XY, length=1) -> XY:
-    veclen = (v.x**2 + v.y**2) ** 0.5
-    if veclen == 0:
-        return v
-    else:
-        return v * (length / veclen)
+    # Return vector of same direction but of given length
+    def unitize(self, length=1):
+        veclen = (self.x**2 + self.y**2) ** 0.5
+        if veclen == 0:
+            return self
+        else:
+            return self * (length / veclen)
