@@ -28,7 +28,6 @@ class Chunk:
                     raise
                     
     def initmap(self) -> List[List[int]]:
-        print('Generating chunk ', self.index)
         if self.index.y < 0:
             acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
         elif self.index.y > 0:
@@ -45,7 +44,7 @@ class Chunk:
         return acc
     
     # Get/Set tiletype from within chunk
-    def get(self, _tindex):
+    def get(self, _tindex) -> int:
         return self.contents[_tindex.x][_tindex.y]
 
     def set_to(self, _tindex, val):
@@ -78,7 +77,7 @@ class Tilemap:
         self.chunks = {}
     
     # Get/Set tiletype of a single tile from within a tilemap
-    def get(self, _tindex):
+    def get(self, _tindex) -> int:
         if type(_tindex) != XY:
             _tindex = XY(_tindex[0], _tindex[1])
         cindex = _tindex // TILES_PER_CHUNK
@@ -114,8 +113,13 @@ class Tilemap:
         
 
 # Convert point XY with epsilon data to tile XY index
-def gettilefrompt(pt):
-    return [
+# TODO: bring XY operations outside call
+def gettilefrompt(pt: XY) -> XY:
+    return XY(
         int(pt[0] // QUANTS_PER_TILE),
         int(pt[1] // QUANTS_PER_TILE)
-    ]
+    )
+
+
+def gettilefromcoord(pt: int) -> int:
+    return int(pt // QUANTS_PER_TILE)

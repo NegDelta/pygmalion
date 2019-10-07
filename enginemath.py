@@ -92,6 +92,9 @@ class XY:
         return self.x, self.y
 
     # arithmetics
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
     def __add__(self, other):
         return XY(
             self.x + other.x,

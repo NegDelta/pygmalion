@@ -41,7 +41,10 @@ tiles[1] = Tile('block', True)
 worldmap = Tilemap()
 masterclk, interval = pygame.time.get_ticks(), 0
 
-player = Movable((0, 0, QUANTS_PER_TILE, QUANTS_PER_TILE), spriteid='marker', mapvelo=SCROLL_SPEED/1000, weight=None)
+player = Movable(
+    (0 * QUANTS_PER_PIXEL, 0, QUANTS_PER_TILE // 2, QUANTS_PER_TILE // 2),
+    spriteid='marker', mapvelo=SCROLL_SPEED/1000, weight=None
+)
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
