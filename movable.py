@@ -157,13 +157,13 @@ class Movable:
                 if 'x' in kwargs.keys():
                     tile_x = kwargs["x"]
                     coll_tile.x = tile_x + sgn(delta.x)
-                    y_axis_parallel = get_tile_border(tile_x, sgn(delta.x))
+                    y_axis_parallel = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
                     isect = get_axis_isect(x=y_axis_parallel)
                     coll_tile.y = gettilefromcoord(isect["p"].y)
                 elif 'y' in kwargs.keys():
                     tile_y = kwargs["y"]
                     coll_tile.y = tile_y + sgn(delta.y)
-                    x_axis_parallel = get_tile_border(tile_y, sgn(delta.y))
+                    x_axis_parallel = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
                     isect = get_axis_isect(y=x_axis_parallel)
                     coll_tile.x = gettilefromcoord(isect["p"].x)
                 else:
