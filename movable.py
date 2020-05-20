@@ -111,6 +111,7 @@ class Movable:
         """
         def collide(p0: XY, p1: XY) -> dict:
             """Calculate the point at which movement between two points stops."""
+            # TODO: rewrite to use PotentialCollPoint instead of dict
 
             # p (0-1) -- current and target positions
             delta: XY = p1 - p0
@@ -123,7 +124,7 @@ class Movable:
             if t0 == t1:
                 return {"k": 1, "p": p1}
 
-            print("Colliding from {} to {}".format(p0, p1))
+            # print("Colliding from {} to {}".format(p0, p1))
 
             def get_tile_border(tile_coord, dirv):
                 border_coord = (tile_coord + getborder(dirv)) * QUANTS_PER_TILE
@@ -173,7 +174,6 @@ class Movable:
                 return acc
 
             def check_candidates():
-                # TODO: remove checks for non-empty intersects
                 if delta.x != 0:
                     x_checks = list(map(
                         lambda x: get_checks_from_tile_coord(x=x),
@@ -218,7 +218,7 @@ class Movable:
                 return  # check_candidates
 
             for candidate_pt in check_candidates():
-                print("Checking stop at {}".format(candidate_pt))
+                # print("Checking stop at {}".format(candidate_pt))
                 check_tile = candidate_pt["t"]
                 check_tiletype = tmap.get(check_tile)
                 if tiles[check_tiletype].coll:

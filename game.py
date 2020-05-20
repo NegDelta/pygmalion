@@ -34,8 +34,8 @@ assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.pn
 assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
 assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
 assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
-tiles[0] = Tile('sky', False)
-tiles[1] = Tile('block', True)
+tiles[0] = TileType('sky', False)
+tiles[1] = TileType('block', True)
 
 
 worldmap = Tilemap()
@@ -58,23 +58,24 @@ pygame.display.flip()
 clk = pygame.time.Clock()
 
 while True:
-    interval = clk.tick()  # how much time elapsed since last frame
+    interval = clk.tick(60)  # how much time elapsed since last frame
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        
         # keypresses
         elif event.type == pygame.KEYDOWN:
 
             # DEBUG space
             if event.key == pygame.K_SPACE:
                 worldmap.go = True
-                print("Your Xs: {} -- {}".format(player.left, player.right))
-                print("Your Ys: {} -- {}".format(player.top,  player.bottom))
+                # print("Your Xs: {} -- {}".format(player.left, player.right))
+                # print("Your Ys: {} -- {}".format(player.top,  player.bottom))
+
+                print("Ticks: {}".format(interval))
 
             elif event.key == pygame.K_ESCAPE:
                 sys.exit()
-                
+
         # DEBUG
         elif event.type == pygame.MOUSEBUTTONDOWN:
             pass
@@ -98,7 +99,7 @@ while True:
     camera.updateposition()
     worldmap.tocamera(camera)
     player.tocamera(camera)
-    
+
     pygame.display.flip()
 
 # and then close the whole thing

@@ -59,7 +59,7 @@ class Chunk:
 
 
 # This class stores info on TYPE, not any particular tile
-class Tile:
+class TileType:
     def __init__(self, _name: str, _coll: bool):
         """
         :param _name: Identifier, also filename for sprites
@@ -97,8 +97,8 @@ class Tilemap:
             self.chunks[_cindex.totuple()] = Chunk(_cindex)
         return self.chunks[_cindex.totuple()]
         
-    # Render a given area of tiles onto a camera's surface            
     def tocamera(self, cam):
+        """Render a given area of tiles onto a camera's surface"""
         # ix, iy are chunk-coords
         c0 = (XY(cam.rect.left, cam.rect.top) / QUANTS_PER_CHUNK).intize()
         c1 = (XY(cam.rect.right, cam.rect.bottom) / QUANTS_PER_CHUNK).intize()
@@ -112,14 +112,15 @@ class Tilemap:
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
         
 
-# Convert point XY with epsilon data to tile XY index
-# TODO: bring XY operations outside call
+def gettilefromcoord(pt: int) -> int:
+    """Convert single point coordinate to single tile coordinate (index)"""
+    return int(pt // QUANTS_PER_TILE)
+
+
 def gettilefrompt(pt: XY) -> XY:
+    """Convert point XY coordinates to tile XY coordinates (index)"""
     return XY(
-        int(pt[0] // QUANTS_PER_TILE),
-        int(pt[1] // QUANTS_PER_TILE)
+        gettilefromcoord(pt[0]),
+        gettilefromcoord(pt[1])
     )
 
-
-def gettilefromcoord(pt: int) -> int:
-    return int(pt // QUANTS_PER_TILE)

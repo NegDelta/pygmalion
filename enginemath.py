@@ -1,8 +1,8 @@
 import numbers
 
 
-# Sign fn
 def sgn(x) -> int:
+    """Return -1, 0 or 1, depending on input sign."""
     if x > 0:
         return 1
     elif x < 0:
@@ -12,26 +12,32 @@ def sgn(x) -> int:
     raise TypeError
 
 
-# Floor. Works down, not towards 0
 def floor(x) -> int:
+    """Round down (not towards 0)."""
     return x//1
 
 
-# Interpolate between x0 (for k=0) & x1 (for k=1)
 def ipol(x0, x1, k):
+    """Interpolate between x0 (for k=0) and x1 (for k=1)."""
     return x0 + (x1-x0) * k
 
 
-# Get factor from interpolated value
-def rev_ipol(x0, x1, x):
+def rev_ipol(x0, x1, x, default=0):
+    """Get factor from interpolated value.
+    :param x0: Value corresponding to k=0
+    :param x1: Value corresponding to k=1
+    :param x: Interpolated value to calculate factor for
+    :param default: Default value for x0=x1
+    :return: The factor k
+    """
     try:
         return (x - x0)/(x1 - x0)
     except ZeroDivisionError:
         return 0
 
 
-# React to movement key being pressed
 def diradd(p1, p2):
+    """React to pressing a movement key."""
     if p1[0] == 0:
         p1[0] = p2[0]
     if p1[1] == 0:
@@ -39,8 +45,8 @@ def diradd(p1, p2):
     return p1
 
 
-# React to movement key being released
 def dirsub(p1, p2):
+    """React to releasing a movement key."""
     if p1[0]*p2[0] > 0:  # signs match and non-zero
         p1[0] = 0
     if p1[1]*p2[1] > 0:
@@ -48,9 +54,13 @@ def dirsub(p1, p2):
     return p1
 
 
-# Return coordinate offset from block that point is in
-# and border about to be hit with given velocity
 def getborder(dirv) -> int:
+    """
+    Get coordinate offset from block that point is in
+    and border about to be hit with given velocity
+    :param dirv: Velocity direction
+    :return: Coordinate offset
+    """
     return int(dirv > 0)
 
 
@@ -71,8 +81,8 @@ class XY:
     def __repr__(self):
         return '<XY({}, {})>'.format(self.x, self.y)
 
-    # index syntax (x[0], x[1]) for compatibility w/ iterables
     def __getitem__(self, key):
+        """Return fields from index syntax (x[0], x[1]) for compatibility w/ iterables."""
         if key == 0:
             return self.x
         elif key == 1:
@@ -91,7 +101,6 @@ class XY:
     def totuple(self):
         return self.x, self.y
 
-    # arithmetics
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
@@ -158,8 +167,8 @@ class XY:
     def xylen(self):
         return (self.x**2 + self.y**2) ** 0.5
 
-    # Return vector of same direction but of given length
     def unitize(self, length=1):
+        """Normalize to unit or given length."""
         veclen = (self.x**2 + self.y**2) ** 0.5
         if veclen == 0:
             return self

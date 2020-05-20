@@ -1,4 +1,4 @@
-from tiles import *
+from gameglobals import *
 from enginemath import XY
 # from movable import Movable
 import pygame
@@ -21,6 +21,7 @@ class Camera:
     # Convert between in-world and on-screen coordinates
 
     def worldtoscreen(self, xy: XY) -> XY:
+        """Convert from in-world to on-screen coordinates."""
         return (xy - XY(self.rect.left, self.rect.top)) / QUANTS_PER_PIXEL
 
     def rectworldtoscreen(self, r: pygame.Rect) -> pygame.Rect:
@@ -30,6 +31,7 @@ class Camera:
         return acc
 
     def screentoworld(self, xy: XY) -> XY:
+        """Convert from on-screen to in-world coordinates."""
         return xy * QUANTS_PER_PIXEL + XY(self.rect.left, self.rect.top)
 
     def updateposition(self):
