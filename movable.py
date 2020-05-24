@@ -1,6 +1,8 @@
 # import pygame
 import math
 # from gameglobals import *
+from typing import Optional
+
 from enginemath import *
 from tiles import *
 from camera import Camera
@@ -127,7 +129,7 @@ class Movable:
 
             # p (0-1) -- current and target positions
             delta: XY = p1 - p0
-            borderxy: XY = XY(getborder(delta.x), getborder(delta.y))
+            # borderxy: XY = XY(getborder(delta.x), getborder(delta.y))
 
             # tx, ty (0-1) -- current and target tiles
             t0: XY = gettilefrompt(p0)
@@ -210,8 +212,8 @@ class Movable:
                     except StopIteration:
                         return None
 
-                next_x = safe_next(iter_x)
-                next_y = safe_next(iter_y)
+                next_x: Optional[PotentialCollPoint] = safe_next(iter_x)
+                next_y: Optional[PotentialCollPoint] = safe_next(iter_y)
 
                 while next_x is not None or next_y is not None:
                     if next_x is None:
@@ -239,7 +241,7 @@ class Movable:
 
             return PotentialCollPoint(k=1, p=p1)
 
-        edges = list()  # all points along the movable's rect which would be collided
+        edges: List[XY] = list()  # all points along the movable's rect which would be collided
 
         # corners
         edges.append(XY(self.left, self.top))
@@ -249,20 +251,23 @@ class Movable:
 
         # points along the edges, just enough to have at least one on each tile
         # Edge cases would fit there just as well, but the less flops the better
-        x_range = math.ceil(self.size.x / QUANTS_PER_TILE)
+        x_range = int(math.ceil(self.size.x / QUANTS_PER_TILE))
         for i in range(1, x_range):
             ix = int(ipol(self.left, self.right, i / x_range))
             edges.append(XY(ix, self.top))
             edges.append(XY(ix, self.bottom - 1))
 
-        y_range = math.ceil(self.size.y / QUANTS_PER_TILE)
+        y_range = int(math.ceil(self.size.y / QUANTS_PER_TILE))
         for i in range(1, y_range):
             iy = int(ipol(self.top, self.bottom, i / y_range))
             edges.append(XY(self.left, iy))
             edges.append(XY(self.right - 1, iy))
 
-        collided_edges = list(map(lambda edge: (edge, collide(edge, edge + d)), edges))
-        # c_es are tuples (edge, dict("p", "k"))
+        collided_edges = list(map(
+            lambda edge: (edge, collide(edge, edge + d)),
+            edges
+        ))
+        # c_es are tuples (edge, PotentialCollPoint)
 
         pess_collided_edge = min(collided_edges, key=lambda c_e: c_e[1].k)
         pessimistic_delta = pess_collided_edge[1].p - pess_collided_edge[0]
