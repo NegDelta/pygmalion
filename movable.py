@@ -1,4 +1,4 @@
-# import pygame
+from pygame import Rect, draw, Color
 import math
 # from gameglobals import *
 from typing import Optional
@@ -76,8 +76,8 @@ class Movable:
         self.right += d.x
         self.bottom += d.y
     
-    def get_rect(self) -> pygame.Rect:
-        return pygame.Rect(self.left, self.top, self.size.x, self.size.y)
+    def get_rect(self) -> Rect:
+        return Rect(self.left, self.top, self.size.x, self.size.y)
 
     def get_raw_displace(self, dt) -> XY:
         acc = XY(self.velo)
@@ -93,8 +93,8 @@ class Movable:
         """
         Renders itself onto given camera
         """
-        pygame.draw.rect(
-            cam.sur, pygame.Color("white"),
+        draw.rect(
+            cam.sur, Color("white"),
             cam.rectworldtoscreen(self.get_rect())
         )
         '''cam.sur.blit(
@@ -172,14 +172,14 @@ class Movable:
                 if 'x' in kwargs.keys():
                     tile_x = kwargs["x"]
                     coll_tile.x = tile_x + sgn(delta.x)
-                    y_axis_parallel = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
-                    isect = get_axis_isect(x=y_axis_parallel)
+                    y_axis_parallel: int = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
+                    isect: PotentialCollPoint = get_axis_isect(x=y_axis_parallel)
                     coll_tile.y = gettilefromcoord(round(isect.p.y))
                 elif 'y' in kwargs.keys():
                     tile_y = kwargs["y"]
                     coll_tile.y = tile_y + sgn(delta.y)
-                    x_axis_parallel = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
-                    isect = get_axis_isect(y=x_axis_parallel)
+                    x_axis_parallel: int = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
+                    isect: PotentialCollPoint = get_axis_isect(y=x_axis_parallel)
                     coll_tile.x = gettilefromcoord(round(isect.p.x))
                 else:
                     raise SyntaxError
@@ -276,7 +276,7 @@ class Movable:
 
 
 class MovableFollowingCamera(Camera):
-    def __init__(self, _sur: pygame.Surface, _mov: Movable):
+    def __init__(self, _sur: Surface, _mov: Movable):
         """
         :param _sur: Surface the camera renders to
         :param _mov: Movable the camera follows

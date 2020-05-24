@@ -1,4 +1,4 @@
-import pygame
+from pygame import Surface
 import random
 from gameglobals import *
 from enginemath import XY
@@ -6,12 +6,13 @@ from typing import List
 
 
 class Chunk:
+    contents: List[List[int]]
     default_id = 0
     
     def __init__(self, _index):
         self.index = _index
         self.contents = self.initmap()
-        self.image = pygame.Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
+        self.image = Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
         
         for ix in range(0, TILES_PER_CHUNK):
             for iy in range(0, TILES_PER_CHUNK):
@@ -123,4 +124,3 @@ def gettilefrompt(pt: XY) -> XY:
         gettilefromcoord(pt[0]),
         gettilefromcoord(pt[1])
     )
-

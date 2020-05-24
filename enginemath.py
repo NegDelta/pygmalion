@@ -33,7 +33,7 @@ def rev_ipol(x0, x1, x, default=0):
     try:
         return (x - x0)/(x1 - x0)
     except ZeroDivisionError:
-        return 0
+        return default
 
 
 def diradd(p1, p2):
