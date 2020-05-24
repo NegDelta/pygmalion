@@ -109,9 +109,21 @@ class Movable:
         :param d: Target displacement
         :return: Displacement ending at nearest obstacle
         """
-        def collide(p0: XY, p1: XY) -> dict:
+        class PotentialCollPoint:
+            def __init__(self, k: numbers.Real, p: XY):
+                self.k = k
+                self.p = p
+                self.tile = None
+
+            def __getattribute__(self, item):
+                acc = object.__getattribute__(self, item)
+                if acc is None and item == "tile":
+                    raise KeyError("Tile not specified for coll point")
+                else:
+                    return acc
+
+        def collide(p0: XY, p1: XY) -> PotentialCollPoint:
             """Calculate the point at which movement between two points stops."""
-            # TODO: rewrite to use PotentialCollPoint instead of dict
 
             # p (0-1) -- current and target positions
             delta: XY = p1 - p0
@@ -122,7 +134,7 @@ class Movable:
             t1: XY = gettilefrompt(p1)
 
             if t0 == t1:
-                return {"k": 1, "p": p1}
+                return PotentialCollPoint(k=1, p=p1)
 
             # print("Colliding from {} to {}".format(p0, p1))
 
@@ -130,7 +142,7 @@ class Movable:
                 border_coord = (tile_coord + getborder(dirv)) * QUANTS_PER_TILE
                 return border_coord
 
-            def get_axis_isect(**kwargs) -> dict:
+            def get_axis_isect(**kwargs) -> PotentialCollPoint:
                 """
                 Return XY which intersects p0-p1 and a given axis parallel
                 :param kwargs: coord either at x or y
@@ -151,26 +163,26 @@ class Movable:
                 else:
                     acc = XY(ipol(p0.x, p1.x, k), given)
                 acc = acc.intize()
-                return {"p": acc, "k": k}
+                return PotentialCollPoint(k=k, p=acc)
 
-            def get_checks_from_tile_coord(**kwargs) -> dict:
+            def get_checks_from_tile_coord(**kwargs) -> PotentialCollPoint:
                 coll_tile = XY()
                 if 'x' in kwargs.keys():
                     tile_x = kwargs["x"]
                     coll_tile.x = tile_x + sgn(delta.x)
                     y_axis_parallel = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
                     isect = get_axis_isect(x=y_axis_parallel)
-                    coll_tile.y = gettilefromcoord(isect["p"].y)
+                    coll_tile.y = gettilefromcoord(round(isect.p.y))
                 elif 'y' in kwargs.keys():
                     tile_y = kwargs["y"]
                     coll_tile.y = tile_y + sgn(delta.y)
                     x_axis_parallel = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
                     isect = get_axis_isect(y=x_axis_parallel)
-                    coll_tile.x = gettilefromcoord(isect["p"].x)
+                    coll_tile.x = gettilefromcoord(round(isect.p.x))
                 else:
                     raise SyntaxError
                 acc = isect
-                acc["t"] = coll_tile
+                acc.tile = coll_tile
                 return acc
 
             def check_candidates():
@@ -209,7 +221,7 @@ class Movable:
                         yield next_x
                         next_x = safe_next(iter_x)
                     else:
-                        if next_x["k"] < next_y["k"]:
+                        if next_x.k < next_y.k:
                             yield next_x
                             next_x = safe_next(iter_x)
                         else:
@@ -217,14 +229,15 @@ class Movable:
                             next_y = safe_next(iter_y)
                 return  # check_candidates
 
+            candidate_pt: PotentialCollPoint
             for candidate_pt in check_candidates():
                 # print("Checking stop at {}".format(candidate_pt))
-                check_tile = candidate_pt["t"]
+                check_tile = candidate_pt.tile
                 check_tiletype = tmap.get(check_tile)
                 if tiles[check_tiletype].coll:
                     return candidate_pt
 
-            return {"p": p1, "k": 1}
+            return PotentialCollPoint(k=1, p=p1)
 
         edges = list()  # all points along the movable's rect which would be collided
 
@@ -251,10 +264,10 @@ class Movable:
         collided_edges = list(map(lambda edge: (edge, collide(edge, edge + d)), edges))
         # c_es are tuples (edge, dict("p", "k"))
 
-        pess_collided_edge = min(collided_edges, key=lambda c_e: c_e[1]["k"])
-        pess_delta = pess_collided_edge[1]["p"] - pess_collided_edge[0]
+        pess_collided_edge = min(collided_edges, key=lambda c_e: c_e[1].k)
+        pessimistic_delta = pess_collided_edge[1].p - pess_collided_edge[0]
 
-        return pess_delta
+        return pessimistic_delta
 
 
 class MovableFollowingCamera(Camera):
