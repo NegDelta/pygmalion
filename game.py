@@ -34,8 +34,8 @@ assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.pn
 assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
 assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
 assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
-tiles[0] = TileType('sky', False)
-tiles[1] = TileType('block', True)
+tiles[0] = TileType('sky', collides=False)
+tiles[1] = TileType('block', collides=True)
 
 
 worldmap = Tilemap()

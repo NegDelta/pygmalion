@@ -59,16 +59,15 @@ class Chunk:
         )
 
 
-# This class stores info on TYPE, not any particular tile
 class TileType:
-    def __init__(self, _name: str, _coll: bool):
+    def __init__(self, _name: str, *, collides: bool):
         """
         :param _name: Identifier, also filename for sprites
-        :param _coll: Whether collisions occur
+        :param collides: Whether collisions occur
         """
         self.name = _name
         self.sprite = assets[_name]
-        self.coll = _coll
+        self.coll = collides
 
 
 class Tilemap:
