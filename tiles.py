@@ -1,17 +1,17 @@
 from pygame import Surface
-import random
+# import random
 from gameglobals import *
 from enginemath import XY
-from typing import List
+from typing import List, Callable
 
 
 class Chunk:
     contents: List[List[int]]
     default_id = 0
     
-    def __init__(self, _index):
+    def __init__(self, _index, *, mapgen: Callable):
         self.index = _index
-        self.contents = self.initmap()
+        self.contents = mapgen(self)
         self.image = Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
         
         for ix in range(0, TILES_PER_CHUNK):
@@ -27,23 +27,7 @@ class Chunk:
                 except TypeError:
                     print(self.contents[ix])
                     raise
-                    
-    def initmap(self) -> List[List[int]]:
-        if self.index.y < 0:
-            acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
-        elif self.index.y > 0:
-            acc = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
-        else:
-            acc = []
-            for i in range(0, TILES_PER_CHUNK):
-                acc.append([])
-                for j in range(0, TILES_PER_CHUNK):
-                    if j / TILES_PER_CHUNK > random.random():
-                        acc[i].append(1)
-                    else:
-                        acc[i].append(0)
-        return acc
-    
+
     # Get/Set tiletype from within chunk
     def get(self, _tindex) -> int:
         return self.contents[_tindex.x][_tindex.y]
@@ -73,8 +57,9 @@ class TileType:
 class Tilemap:
     chunks: dict
 
-    def __init__(self):
+    def __init__(self, chunkgen: Callable):
         self.chunks = {}
+        self.chunk_generator = chunkgen
     
     # Get/Set tiletype of a single tile from within a tilemap
     def get(self, _tindex) -> int:
@@ -94,7 +79,7 @@ class Tilemap:
     # Get a single chunk from within a tilemap
     def getchunk(self, _cindex):
         if not (_cindex.totuple()) in self.chunks.keys():
-            self.chunks[_cindex.totuple()] = Chunk(_cindex)
+            self.chunks[_cindex.totuple()] = Chunk(_cindex, mapgen=self.chunk_generator)
         return self.chunks[_cindex.totuple()]
         
     def tocamera(self, cam):
@@ -110,7 +95,9 @@ class Tilemap:
                     ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL  # QUANTS_PER_CHUNK
                 ).floor()
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
-        
+
+
+# TODO: make static
 
 def gettilefromcoord(pt: int) -> int:
     """Convert single point coordinate to single tile coordinate (index)"""

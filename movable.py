@@ -1,7 +1,7 @@
 from pygame import Rect, draw, Color
 import math
 # from gameglobals import *
-from typing import Optional
+from typing import Optional, Tuple
 
 from enginemath import *
 from tiles import *
@@ -97,12 +97,6 @@ class Movable:
             cam.sur, Color("white"),
             cam.rectworldtoscreen(self.get_rect())
         )
-        '''cam.sur.blit(
-            assets[self.spriteid],
-            (
-                cam.worldtoscreen(XY(self.left, self.top)).totuple()
-            )
-        )'''
 
     def get_collision(self, tmap: Tilemap, d: XY) -> XY:
         """
@@ -112,11 +106,14 @@ class Movable:
         :return: Displacement ending at nearest obstacle
         """
         class PotentialCollPoint:
+            tile: Optional[XY]
+
             def __init__(self, k: numbers.Real, p: XY):
                 self.k = k
                 self.p = p
                 self.tile = None
 
+            # Will trigger when tile is called before specified
             def __getattribute__(self, item):
                 acc = object.__getattribute__(self, item)
                 if acc is None and item == "tile":
@@ -183,10 +180,12 @@ class Movable:
                     coll_tile.x = gettilefromcoord(round(isect.p.x))
                 else:
                     raise SyntaxError
-                acc = isect
+                acc: PotentialCollPoint = isect
                 acc.tile = coll_tile
                 return acc
 
+            # Iterate over collision candidates, interleaving H and V colls in respect to k
+            # might be possible to simplify and/or generalize
             def check_candidates():
                 if delta.x != 0:
                     x_checks = list(map(
@@ -243,7 +242,7 @@ class Movable:
 
         edges: List[XY] = list()  # all points along the movable's rect which would be collided
 
-        # corners
+        # corners; note that right and bottom specify first quants not occupied, hence the -1s
         edges.append(XY(self.left, self.top))
         edges.append(XY(self.left, self.bottom - 1))
         edges.append(XY(self.right - 1, self.top))
@@ -263,14 +262,13 @@ class Movable:
             edges.append(XY(self.left, iy))
             edges.append(XY(self.right - 1, iy))
 
-        collided_edges = list(map(
-            lambda edge: (edge, collide(edge, edge + d)),
-            edges
-        ))
-        # c_es are tuples (edge, PotentialCollPoint)
+        def pair_with_collision(edge: XY) -> Tuple[XY, PotentialCollPoint]:
+            return edge, collide(edge, edge+d)
 
-        pess_collided_edge = min(collided_edges, key=lambda c_e: c_e[1].k)
-        pessimistic_delta = pess_collided_edge[1].p - pess_collided_edge[0]
+        collided_edges = list(map(pair_with_collision, edges))
+
+        pess_collided_edge: Tuple[XY, PotentialCollPoint] = min(collided_edges, key=lambda c_e: c_e[1].k)
+        pessimistic_delta: XY = pess_collided_edge[1].p - pess_collided_edge[0]
 
         return pessimistic_delta
 

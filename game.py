@@ -1,15 +1,18 @@
 import os
+import random
 import sys
-# import pygame
-# import math  # for collision code
-# from pygame.locals import *
 
+import pygame
+
+from movable import Movable, MovableFollowingCamera
 # locals
 # from gameglobals import *
 # from enginemath import *
-# from tiles import *
-from movable import *
-from camera import *
+from tiles import *
+
+# import math  # for collision code
+# from pygame.locals import *
+# from camera import Camera
 
 
 # MAIN CODE BEGINS HERE #######
@@ -38,7 +41,24 @@ tiles[0] = TileType('sky', collides=False)
 tiles[1] = TileType('block', collides=True)
 
 
-worldmap = Tilemap()
+def dummy_gradient_chunkgen(c: Chunk) -> List[List[int]]:
+    if c.index.y < 0:
+        acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+    elif c.index.y > 0:
+        acc = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+    else:
+        acc = []
+        for i in range(0, TILES_PER_CHUNK):
+            acc.append([])
+            for j in range(0, TILES_PER_CHUNK):
+                if j / TILES_PER_CHUNK > random.random():
+                    acc[i].append(1)
+                else:
+                    acc[i].append(0)
+    return acc
+
+
+worldmap = Tilemap(dummy_gradient_chunkgen)
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(
@@ -48,9 +68,6 @@ player = Movable(
 
 pygame.display.init()
 screen = pygame.display.set_mode((640, 480))
-view = screen.get_rect()
-view.w *= QUANTS_PER_PIXEL
-view.h *= QUANTS_PER_PIXEL
 
 camera = MovableFollowingCamera(screen, player)
 
