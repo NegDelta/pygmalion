@@ -1,8 +1,9 @@
 from pygame import Surface
-# import random
-from gameglobals import *
 from enginemath import XY
 from typing import List, Callable
+
+from gameglobals import PIXELS_PER_CHUNK, TILES_PER_CHUNK, QUANTS_PER_TILE, QUANTS_PER_PIXEL, QUANTS_PER_CHUNK, \
+    tiles, assets
 
 
 class Chunk:
@@ -44,6 +45,10 @@ class Chunk:
 
 
 class TileType:
+    name: str
+    sprite: Surface
+    coll: bool
+
     def __init__(self, _name: str, *, collides: bool):
         """
         :param _name: Identifier, also filename for sprites
@@ -96,8 +101,6 @@ class Tilemap:
                 ).floor()
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
 
-
-# TODO: make static
 
 def gettilefromcoord(pt: int) -> int:
     """Convert single point coordinate to single tile coordinate (index)"""

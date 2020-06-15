@@ -1,11 +1,11 @@
-from pygame import Rect, draw, Color
+from pygame import Rect, draw, Color, Surface
 import math
-# from gameglobals import *
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from enginemath import *
-from tiles import *
+import tiles as pygm_tiles
 from camera import Camera
+from gameglobals import QUANTS_PER_TILE, tiles
 
 
 class Movable:
@@ -84,7 +84,7 @@ class Movable:
         acc = acc.unitize(dt).intize()
         return acc
 
-    def get_collided_displace(self, dt, tmap: Tilemap) -> XY:
+    def get_collided_displace(self, dt, tmap: pygm_tiles.Tilemap) -> XY:
         acc = self.get_raw_displace(dt)
         acc = self.get_collision(tmap, acc)
         return acc
@@ -98,7 +98,7 @@ class Movable:
             cam.rectworldtoscreen(self.get_rect())
         )
 
-    def get_collision(self, tmap: Tilemap, d: XY) -> XY:
+    def get_collision(self, tmap: pygm_tiles.Tilemap, d: XY) -> XY:
         """
         Return actual displacement given map of obstacles
         :param tmap: Tilemap of obstacles
@@ -129,8 +129,8 @@ class Movable:
             # borderxy: XY = XY(getborder(delta.x), getborder(delta.y))
 
             # tx, ty (0-1) -- current and target tiles
-            t0: XY = gettilefrompt(p0)
-            t1: XY = gettilefrompt(p1)
+            t0: XY = pygm_tiles.gettilefrompt(p0)
+            t1: XY = pygm_tiles.gettilefrompt(p1)
 
             if t0 == t1:
                 return PotentialCollPoint(k=1, p=p1)
@@ -171,13 +171,13 @@ class Movable:
                     coll_tile.x = tile_x + sgn(delta.x)
                     y_axis_parallel: int = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
                     isect: PotentialCollPoint = get_axis_isect(x=y_axis_parallel)
-                    coll_tile.y = gettilefromcoord(round(isect.p.y))
+                    coll_tile.y = pygm_tiles.gettilefromcoord(round(isect.p.y))
                 elif 'y' in kwargs.keys():
                     tile_y = kwargs["y"]
                     coll_tile.y = tile_y + sgn(delta.y)
                     x_axis_parallel: int = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
                     isect: PotentialCollPoint = get_axis_isect(y=x_axis_parallel)
-                    coll_tile.x = gettilefromcoord(round(isect.p.x))
+                    coll_tile.x = pygm_tiles.gettilefromcoord(round(isect.p.x))
                 else:
                     raise SyntaxError
                 acc: PotentialCollPoint = isect

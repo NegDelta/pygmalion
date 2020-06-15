@@ -1,18 +1,14 @@
-import os
+# import os
 import random
 import sys
-
+from typing import List
 import pygame
 
-from movable import Movable, MovableFollowingCamera
 # locals
-# from gameglobals import *
-# from enginemath import *
-from tiles import *
-
-# import math  # for collision code
-# from pygame.locals import *
-# from camera import Camera
+from movable import Movable, MovableFollowingCamera
+import tiles as pygm_tiles
+from gameglobals import *
+from enginemath import *
 
 
 # MAIN CODE BEGINS HERE #######
@@ -37,11 +33,11 @@ assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.pn
 assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
 assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
 assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
-tiles[0] = TileType('sky', collides=False)
-tiles[1] = TileType('block', collides=True)
+tiles[0] = pygm_tiles.TileType('sky', collides=False)
+tiles[1] = pygm_tiles.TileType('block', collides=True)
 
 
-def dummy_gradient_chunkgen(c: Chunk) -> List[List[int]]:
+def dummy_gradient_chunkgen(c: pygm_tiles.Chunk) -> List[List[int]]:
     if c.index.y < 0:
         acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
     elif c.index.y > 0:
@@ -58,7 +54,7 @@ def dummy_gradient_chunkgen(c: Chunk) -> List[List[int]]:
     return acc
 
 
-worldmap = Tilemap(dummy_gradient_chunkgen)
+worldmap = pygm_tiles.Tilemap(dummy_gradient_chunkgen)
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(

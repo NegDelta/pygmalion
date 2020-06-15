@@ -1,10 +1,16 @@
+import os
+
+from pygame import Surface, image
+from typing import Dict
+
+
 class Game:
     tiles_per_chunk: int
     pixels_per_tile: int
     quants_per_pixel: int
     scroll_speed: int
-    _assets: dict
-    _tile_types: dict
+    assets: Dict[str, Surface]
+    tile_types: dict
 
     def __init__(
             self, *,
@@ -17,8 +23,8 @@ class Game:
         self.pixels_per_tile = pixels_per_tile
         self.quants_per_pixel = quants_per_pixel
         self.scroll_speed = scroll_speed
-        self._assets = {}
-        self._tile_types = {}
+        self.assets = {}
+        # self.tile_types = {0: TileType(_name="sky", collides=False)}
 
     def quants_per_tile(self):
         return self.quants_per_pixel * self.pixels_per_tile
@@ -36,8 +42,11 @@ class Game:
         """
         pass
 
-    def register_asset(self):
-        pass
+    def register_asset(self, key: str, filename: str):
+        if key in self.assets.keys():
+            raise ValueError("An asset is already registered at the key \"{}\"".format(key))
+        script_dir = os.path.dirname(__file__)
+        self.assets[key] = image.load(os.path.join(script_dir, 'assets', filename))
 
 
 TILES_PER_CHUNK = 12
@@ -50,5 +59,5 @@ QUANTS_PER_CHUNK = TILES_PER_CHUNK * QUANTS_PER_TILE
 
 SCROLL_SPEED = 75 * QUANTS_PER_PIXEL
 
-assets = {}
-tiles = {}
+assets: Dict[str, Surface] = {}
+tiles: dict = {}
