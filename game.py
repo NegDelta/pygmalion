@@ -3,11 +3,12 @@ import random
 import sys
 from typing import List
 import pygame
+import os
 
 # locals
 from movable import Movable, MovableFollowingCamera
 import tiles as pygm_tiles
-from gameglobals import *
+import gameglobals
 from enginemath import *
 
 
@@ -27,6 +28,7 @@ print("QUANTS_PER_CHUNK =", QUANTS_PER_CHUNK)
 script_dir = os.path.dirname(__file__)
 
 pygame.init()
+game = gameglobals.Game(tiles_per_chunk=12, pixels_per_tile=16, quants_per_pixel=20, scroll_speed=1500)
 
 # load assets
 assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.png'))
