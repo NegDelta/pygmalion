@@ -3,12 +3,11 @@ import random
 import sys
 from typing import List
 import pygame
-import os
 
 # locals
+from gameglobals import Game
 from movable import Movable, MovableFollowingCamera
 import tiles as pygm_tiles
-import gameglobals
 from enginemath import *
 
 
@@ -16,52 +15,54 @@ from enginemath import *
 
 
 # initialize globals
-print("TILES_PER_CHUNK =", TILES_PER_CHUNK)
-print("PIXELS_PER_TILE =", PIXELS_PER_TILE)
-print("QUANTS_PER_PIXEL =", QUANTS_PER_PIXEL)
-
-print("QUANTS_PER_TILE =", QUANTS_PER_TILE)
-print("PIXELS_PER_CHUNK =", PIXELS_PER_CHUNK)
-print("QUANTS_PER_CHUNK =", QUANTS_PER_CHUNK)
-
-# absolute dir the script is in, for relative paths
-script_dir = os.path.dirname(__file__)
 
 pygame.init()
-game = gameglobals.Game(tiles_per_chunk=12, pixels_per_tile=16, quants_per_pixel=20, scroll_speed=1500)
+game = Game(tiles_per_chunk=12, pixels_per_tile=16, quants_per_pixel=20, scroll_speed=1500)
+
+print("TILES_PER_CHUNK =", game.tiles_per_chunk)
+print("PIXELS_PER_TILE =", game.pixels_per_tile)
+print("QUANTS_PER_PIXEL =", game.quants_per_pixel)
+
+print("QUANTS_PER_TILE =", game.quants_per_tile)
+print("PIXELS_PER_CHUNK =", game.pixels_per_chunk)
+print("QUANTS_PER_CHUNK =", game.quants_per_chunk)
 
 # load assets
+game.register_asset('sky', 'sky.png')
+game.register_asset('block', 'block.png')
+"""
 assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.png'))
 assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
 assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
 assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
-tiles[0] = pygm_tiles.TileType('sky', collides=False)
-tiles[1] = pygm_tiles.TileType('block', collides=True)
+"""
+TILE_SKY = game.register_tiletype('sky', False)
+TILE_BLOCK = game.register_tiletype('block', True)
 
 
 def dummy_gradient_chunkgen(c: pygm_tiles.Chunk) -> List[List[int]]:
     if c.index.y < 0:
-        acc = [[0] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+        acc = [[0] * game.tiles_per_chunk] * game.tiles_per_chunk
     elif c.index.y > 0:
-        acc = [[1] * TILES_PER_CHUNK] * TILES_PER_CHUNK
+        acc = [[1] * game.tiles_per_chunk] * game.tiles_per_chunk
     else:
         acc = []
-        for i in range(0, TILES_PER_CHUNK):
+        for i in range(0, game.tiles_per_chunk):
             acc.append([])
-            for j in range(0, TILES_PER_CHUNK):
-                if j / TILES_PER_CHUNK > random.random():
+            for j in range(0, game.tiles_per_chunk):
+                if j / game.tiles_per_chunk > random.random():
                     acc[i].append(1)
                 else:
                     acc[i].append(0)
     return acc
 
 
-worldmap = pygm_tiles.Tilemap(dummy_gradient_chunkgen)
+worldmap = pygm_tiles.Tilemap(game, dummy_gradient_chunkgen)
 masterclk, interval = pygame.time.get_ticks(), 0
 
 player = Movable(
-    (0 * QUANTS_PER_PIXEL, 0, QUANTS_PER_TILE, QUANTS_PER_TILE),
-    spriteid='marker', mapvelo=SCROLL_SPEED/1000, weight=None
+    game, (0 * game.quants_per_pixel, 0, game.quants_per_tile, game.quants_per_tile),
+    spriteid='marker', mapvelo=game.scroll_speed/1000, weight=None
 )
 
 pygame.display.init()
@@ -108,7 +109,7 @@ while True:
         new_velo += XY(1, 0)
     player.velo = new_velo
 
-    displace = player.get_collided_displace(SCROLL_SPEED * interval/1000, worldmap)
+    displace = player.get_collided_displace(game.scroll_speed * interval/1000, worldmap)
     player.move(displace)
 
     camera.updateposition()

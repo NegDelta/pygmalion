@@ -1,28 +1,31 @@
+from __future__ import annotations  # for the Game <-> tiles co-dependency
 from pygame import Surface
 from enginemath import XY
 from typing import List, Callable
 
-from gameglobals import PIXELS_PER_CHUNK, TILES_PER_CHUNK, QUANTS_PER_TILE, QUANTS_PER_PIXEL, QUANTS_PER_CHUNK, \
-    tiles, assets
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from gameglobals import Game
 
 
 class Chunk:
     contents: List[List[int]]
     default_id = 0
     
-    def __init__(self, _index, *, mapgen: Callable):
+    def __init__(self, game: Game, _index, *, mapgen: Callable):
+        self.game = game
         self.index = _index
         self.contents = mapgen(self)
-        self.image = Surface((int(PIXELS_PER_CHUNK), int(PIXELS_PER_CHUNK)))
+        self.image = Surface((int(game.pixels_per_chunk), int(game.pixels_per_chunk)))
         
-        for ix in range(0, TILES_PER_CHUNK):
-            for iy in range(0, TILES_PER_CHUNK):
+        for ix in range(0, game.tiles_per_chunk):
+            for iy in range(0, game.tiles_per_chunk):
                 try:
                     self.image.blit(
-                        tiles[self.get(XY(ix, iy))].sprite,  # sprite in tile i
+                        game.tile_types[self.get(XY(ix, iy))].sprite,  # sprite in tile i
                         (
-                            ix * QUANTS_PER_TILE / QUANTS_PER_PIXEL,
-                            iy * QUANTS_PER_TILE / QUANTS_PER_PIXEL
+                            ix * game.quants_per_tile / game.quants_per_pixel,
+                            iy * game.quants_per_tile / game.quants_per_pixel
                         )
                     )
                 except TypeError:
@@ -36,10 +39,10 @@ class Chunk:
     def set_to(self, _tindex, val):
         self.contents[_tindex.x][_tindex.y] = val
         self.image.blit(
-            tiles[self.get(_tindex)].sprite,  # sprite in tile _tindex
+            self.game.tiles[self.get(_tindex)].sprite,  # sprite in tile _tindex
             (
-                _tindex.x * QUANTS_PER_TILE,
-                _tindex.y * QUANTS_PER_TILE
+                _tindex.x * self.game.quants_per_tile,
+                _tindex.y * self.game.quants_per_tile
             )
         )
 
@@ -49,67 +52,55 @@ class TileType:
     sprite: Surface
     coll: bool
 
-    def __init__(self, _name: str, *, collides: bool):
+    def __init__(self, _name: str, *, sprite: Surface, collides: bool):
         """
         :param _name: Identifier, also filename for sprites
         :param collides: Whether collisions occur
         """
         self.name = _name
-        self.sprite = assets[_name]
+        self.sprite = sprite
         self.coll = collides
 
 
 class Tilemap:
     chunks: dict
 
-    def __init__(self, chunkgen: Callable):
+    def __init__(self, game: Game, chunkgen: Callable):
         self.chunks = {}
         self.chunk_generator = chunkgen
+        self.game = game
     
     # Get/Set tiletype of a single tile from within a tilemap
     def get(self, _tindex) -> int:
         if type(_tindex) != XY:
             _tindex = XY(_tindex[0], _tindex[1])
-        cindex = _tindex // TILES_PER_CHUNK
-        tindex = _tindex % TILES_PER_CHUNK
+        cindex = _tindex // self.game.tiles_per_chunk
+        tindex = _tindex % self.game.tiles_per_chunk
         return self.getchunk(cindex).get(tindex)
 
     def set_to(self, _tindex, val):
         if type(_tindex) != XY:
             _tindex = XY(_tindex[0], _tindex[1])
-        cindex = _tindex // TILES_PER_CHUNK
-        tindex = _tindex % TILES_PER_CHUNK
+        cindex = _tindex // self.game.tiles_per_chunk
+        tindex = _tindex % self.game.tiles_per_chunk
         self.getchunk(cindex).set_to(tindex, val)
     
     # Get a single chunk from within a tilemap
     def getchunk(self, _cindex):
         if not (_cindex.totuple()) in self.chunks.keys():
-            self.chunks[_cindex.totuple()] = Chunk(_cindex, mapgen=self.chunk_generator)
+            self.chunks[_cindex.totuple()] = Chunk(self.game, _cindex, mapgen=self.chunk_generator)
         return self.chunks[_cindex.totuple()]
         
     def tocamera(self, cam):
         """Render a given area of tiles onto a camera's surface"""
         # ix, iy are chunk-coords
-        c0 = (XY(cam.rect.left, cam.rect.top) / QUANTS_PER_CHUNK).intize()
-        c1 = (XY(cam.rect.right, cam.rect.bottom) / QUANTS_PER_CHUNK).intize()
+        c0 = (XY(cam.rect.left, cam.rect.top) / self.game.quants_per_chunk).intize()
+        c1 = (XY(cam.rect.right, cam.rect.bottom) / self.game.quants_per_chunk).intize()
         for ix in range(c0.x - 1, c1.x + 1):
             for iy in range(c0.y - 1, c1.y + 1):
                 ixy = XY(ix, iy)
                 # point on screen where chunk is rendered
                 scr_targetxy = cam.worldtoscreen(
-                    ixy * PIXELS_PER_CHUNK * QUANTS_PER_PIXEL  # QUANTS_PER_CHUNK
+                    ixy * self.game.quants_per_chunk
                 ).floor()
                 cam.sur.blit(self.getchunk(ixy).image, scr_targetxy.totuple())
-
-
-def gettilefromcoord(pt: int) -> int:
-    """Convert single point coordinate to single tile coordinate (index)"""
-    return int(pt // QUANTS_PER_TILE)
-
-
-def gettilefrompt(pt: XY) -> XY:
-    """Convert point XY coordinates to tile XY coordinates (index)"""
-    return XY(
-        gettilefromcoord(pt[0]),
-        gettilefromcoord(pt[1])
-    )

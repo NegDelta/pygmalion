@@ -1,4 +1,4 @@
-from gameglobals import *
+from gameglobals import Game
 from enginemath import XY
 # from movable import Movable
 import pygame

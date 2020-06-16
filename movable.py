@@ -5,11 +5,11 @@ from typing import Optional, Tuple, List
 from enginemath import *
 import tiles as pygm_tiles
 from camera import Camera
-from gameglobals import QUANTS_PER_TILE, tiles
+from gameglobals import Game
 
 
 class Movable:
-    def __init__(self, coords, spriteid, weight, mapvelo):
+    def __init__(self, game: Game, coords, spriteid, weight, mapvelo):
         size = XY()
 
         if len(coords) == 4:  # Number, Number. Number, Number
@@ -31,6 +31,7 @@ class Movable:
                     raise SyntaxError("Not enough arguments")
         else:
             raise SyntaxError("Wrong number of arguments")
+        self.game = game
         self.left = left
         self.top = top
         self.size = size
@@ -124,13 +125,24 @@ class Movable:
         def collide(p0: XY, p1: XY) -> PotentialCollPoint:
             """Calculate the point at which movement between two points stops."""
 
+            def gettilefromcoord(pt: int) -> int:
+                """Convert single point coordinate to single tile coordinate (index)"""
+                return int(pt // self.game.quants_per_tile)
+
+            def gettilefrompt(pt: XY) -> XY:
+                """Convert point XY coordinates to tile XY coordinates (index)"""
+                return XY(
+                    gettilefromcoord(pt[0]),
+                    gettilefromcoord(pt[1])
+                )
+
             # p (0-1) -- current and target positions
             delta: XY = p1 - p0
             # borderxy: XY = XY(getborder(delta.x), getborder(delta.y))
 
             # tx, ty (0-1) -- current and target tiles
-            t0: XY = pygm_tiles.gettilefrompt(p0)
-            t1: XY = pygm_tiles.gettilefrompt(p1)
+            t0: XY = gettilefrompt(p0)
+            t1: XY = gettilefrompt(p1)
 
             if t0 == t1:
                 return PotentialCollPoint(k=1, p=p1)
@@ -138,7 +150,7 @@ class Movable:
             # print("Colliding from {} to {}".format(p0, p1))
 
             def get_tile_border(tile_coord, dirv):
-                border_coord = (tile_coord + getborder(dirv)) * QUANTS_PER_TILE
+                border_coord = (tile_coord + getborder(dirv)) * self.game.quants_per_tile
                 return border_coord
 
             def get_axis_isect(**kwargs) -> PotentialCollPoint:
@@ -171,13 +183,13 @@ class Movable:
                     coll_tile.x = tile_x + sgn(delta.x)
                     y_axis_parallel: int = get_tile_border(tile_x, sgn(delta.x)) - getborder(delta.x)
                     isect: PotentialCollPoint = get_axis_isect(x=y_axis_parallel)
-                    coll_tile.y = pygm_tiles.gettilefromcoord(round(isect.p.y))
+                    coll_tile.y = gettilefromcoord(round(isect.p.y))
                 elif 'y' in kwargs.keys():
                     tile_y = kwargs["y"]
                     coll_tile.y = tile_y + sgn(delta.y)
                     x_axis_parallel: int = get_tile_border(tile_y, sgn(delta.y)) - getborder(delta.y)
                     isect: PotentialCollPoint = get_axis_isect(y=x_axis_parallel)
-                    coll_tile.x = pygm_tiles.gettilefromcoord(round(isect.p.x))
+                    coll_tile.x = gettilefromcoord(round(isect.p.x))
                 else:
                     raise SyntaxError
                 acc: PotentialCollPoint = isect
@@ -235,7 +247,7 @@ class Movable:
                 # print("Checking stop at {}".format(candidate_pt))
                 check_tile = candidate_pt.tile
                 check_tiletype = tmap.get(check_tile)
-                if tiles[check_tiletype].coll:
+                if self.game.tile_types[check_tiletype].coll:
                     return candidate_pt
 
             return PotentialCollPoint(k=1, p=p1)
@@ -250,13 +262,13 @@ class Movable:
 
         # points along the edges, just enough to have at least one on each tile
         # Edge cases would fit there just as well, but the less flops the better
-        x_range = int(math.ceil(self.size.x / QUANTS_PER_TILE))
+        x_range = int(math.ceil(self.size.x / self.game.quants_per_tile))
         for i in range(1, x_range):
             ix = int(ipol(self.left, self.right, i / x_range))
             edges.append(XY(ix, self.top))
             edges.append(XY(ix, self.bottom - 1))
 
-        y_range = int(math.ceil(self.size.y / QUANTS_PER_TILE))
+        y_range = int(math.ceil(self.size.y / self.game.quants_per_tile))
         for i in range(1, y_range):
             iy = int(ipol(self.top, self.bottom, i / y_range))
             edges.append(XY(self.left, iy))
