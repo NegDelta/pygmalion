@@ -17,6 +17,9 @@ from enginemath import *
 # initialize globals
 
 pygame.init()
+pygame.display.init()
+screen = pygame.display.set_mode((640, 480))
+
 game = Game(tiles_per_chunk=12, pixels_per_tile=16, quants_per_pixel=20, scroll_speed=1500)
 
 print("TILES_PER_CHUNK =", game.tiles_per_chunk)
@@ -30,12 +33,6 @@ print("QUANTS_PER_CHUNK =", game.quants_per_chunk)
 # load assets
 game.register_asset('sky', 'sky.png')
 game.register_asset('block', 'block.png')
-"""
-assets['block'] = pygame.image.load(os.path.join(script_dir, 'assets', 'block.png'))
-assets['sky'] = pygame.image.load(os.path.join(script_dir, 'assets', 'sky.png'))
-assets['marker'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker.png'))
-assets['marker-w'] = pygame.image.load(os.path.join(script_dir, 'assets', 'marker-w.png'))
-"""
 TILE_SKY = game.register_tiletype('sky', False)
 TILE_BLOCK = game.register_tiletype('block', True)
 
@@ -57,24 +54,18 @@ def dummy_gradient_chunkgen(c: pygm_tiles.Chunk) -> List[List[int]]:
     return acc
 
 
-worldmap = pygm_tiles.Tilemap(game, dummy_gradient_chunkgen)
-masterclk, interval = pygame.time.get_ticks(), 0
-
-player = Movable(
+# TODO: replace with methods akin to register_asset
+game.tilemaps = {"worldmap": pygm_tiles.Tilemap(game, dummy_gradient_chunkgen)}
+game.movables = {"player": Movable(
     game, (0 * game.quants_per_pixel, 0, game.quants_per_tile, game.quants_per_tile),
-    spriteid='marker', mapvelo=game.scroll_speed/1000, weight=None
-)
-
-pygame.display.init()
-screen = pygame.display.set_mode((640, 480))
-
-camera = MovableFollowingCamera(screen, player)
+    spriteid='marker', mapvelo=game.scroll_speed / 1000, weight=None
+)}
+game.cameras = {"main": MovableFollowingCamera(game, screen, game.movables["player"])}
 
 pygame.display.flip()
-clk = pygame.time.Clock()
-
+interval = 0
 while True:
-    interval = clk.tick(60)  # how much time elapsed since last frame
+    interval = game.clock.tick(60)  # how much time elapsed since last frame
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -83,7 +74,6 @@ while True:
 
             # DEBUG space
             if event.key == pygame.K_SPACE:
-                worldmap.go = True
                 # print("Your Xs: {} -- {}".format(player.left, player.right))
                 # print("Your Ys: {} -- {}".format(player.top,  player.bottom))
 
@@ -107,14 +97,16 @@ while True:
         new_velo += XY(0, -1)
     if pressed_keys[pygame.K_RIGHT]:
         new_velo += XY(1, 0)
-    player.velo = new_velo
+    game.movables["player"].velo = new_velo
 
-    displace = player.get_collided_displace(game.scroll_speed * interval/1000, worldmap)
-    player.move(displace)
+    displace = game.movables["player"].get_collided_displace(
+        game.scroll_speed * interval/1000, game.tilemaps["worldmap"]
+    )
+    game.movables["player"].move(displace)
 
-    camera.updateposition()
-    worldmap.tocamera(camera)
-    player.tocamera(camera)
+    game.cameras["main"].updateposition()
+    game.tilemaps["worldmap"].tocamera(game.cameras["main"])
+    game.movables["player"].tocamera(game.cameras["main"])
 
     pygame.display.flip()
 

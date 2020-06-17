@@ -3,6 +3,8 @@ import os
 from pygame import Surface, image
 from typing import Dict
 
+from pygame.time import Clock
+
 import tiles as pgtiles
 
 
@@ -15,6 +17,7 @@ class Game:
     tile_types: list
     tiles: dict
 
+    # TODO: move to explicit init
     def __init__(
             self, *,
             tiles_per_chunk,
@@ -35,6 +38,8 @@ class Game:
         # self.tile_types = {0: pgtiles.TileType(_name="sky", collides=False)}
         self.tile_types = []
 
+        self.clock = Clock()
+
     def register_tiletype(self, asset_key: str, collides: bool) -> int:
         """
         Register tiletype
@@ -53,6 +58,7 @@ class Game:
         self.assets[key] = new_sprite
 
 
+"""
 TILES_PER_CHUNK = 12
 PIXELS_PER_TILE = 16
 QUANTS_PER_PIXEL = 20
@@ -65,3 +71,4 @@ SCROLL_SPEED = 75 * QUANTS_PER_PIXEL
 
 assets: Dict[str, Surface] = {}
 tiles: dict = {}
+"""
