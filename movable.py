@@ -286,13 +286,13 @@ class Movable:
 
 
 class MovableFollowingCamera(Camera):
-    def __init__(self, _sur: Surface, _mov: Movable):
+    def __init__(self, game: Game, _sur: Surface, _mov: Movable):
         """
         :param _sur: Surface the camera renders to
         :param _mov: Movable the camera follows
         """
 
-        super().__init__(_sur)
+        super().__init__(game, _sur)
         self.mov = _mov
 
     def updateposition(self):
