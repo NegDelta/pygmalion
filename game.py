@@ -54,13 +54,12 @@ def dummy_gradient_chunkgen(c: pygm_tiles.Chunk) -> List[List[int]]:
     return acc
 
 
-# TODO: replace with methods akin to register_asset
-game.tilemaps = {"worldmap": pygm_tiles.Tilemap(game, dummy_gradient_chunkgen)}
-game.movables = {"player": Movable(
+game.register_object("worldmap", pygm_tiles.Tilemap(game, dummy_gradient_chunkgen))
+game.register_object("player", Movable(
     game, (0 * game.quants_per_pixel, 0, game.quants_per_tile, game.quants_per_tile),
     spriteid='marker', mapvelo=game.scroll_speed / 1000, weight=None
-)}
-game.cameras = {"main": MovableFollowingCamera(game, screen, game.movables["player"])}
+))
+game.register_object("main", MovableFollowingCamera(game, screen, game.movables["player"]))
 
 pygame.display.flip()
 interval = 0

@@ -4,6 +4,7 @@ from enginemath import XY
 import pygame
 
 
+# TODO: rework to not require explicit Game backref
 class Camera:
     def __init__(self, game: Game, _sur: pygame.Surface):
         """

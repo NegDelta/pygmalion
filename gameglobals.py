@@ -5,7 +5,7 @@ from typing import Dict
 
 from pygame.time import Clock
 
-import tiles as pgtiles
+from tiles import TileType
 
 
 class Game:
@@ -17,7 +17,6 @@ class Game:
     tile_types: list
     tiles: dict
 
-    # TODO: move to explicit init
     def __init__(
             self, *,
             tiles_per_chunk,
@@ -25,6 +24,9 @@ class Game:
             quants_per_pixel,
             scroll_speed,
     ):
+        self.movables = {}
+        self.cameras = {}
+        self.tilemaps = {}
         self.quants_per_pixel = quants_per_pixel
         self.pixels_per_tile = pixels_per_tile
         self.quants_per_tile = self.quants_per_pixel * self.pixels_per_tile
@@ -45,7 +47,7 @@ class Game:
         Register tiletype
         :return: The id of registered tiletype
         """
-        new_type = pgtiles.TileType(asset_key, sprite=self.assets[asset_key], collides=collides)
+        new_type = TileType(asset_key, sprite=self.assets[asset_key], collides=collides)
         self.tile_types.append(new_type)
         new_index = len(self.tile_types) - 1
         return new_index
@@ -57,18 +59,21 @@ class Game:
         new_sprite: Surface = image.load(os.path.join(script_dir, 'assets', filename))
         self.assets[key] = new_sprite
 
-
-"""
-TILES_PER_CHUNK = 12
-PIXELS_PER_TILE = 16
-QUANTS_PER_PIXEL = 20
-
-QUANTS_PER_TILE = QUANTS_PER_PIXEL * PIXELS_PER_TILE
-PIXELS_PER_CHUNK = TILES_PER_CHUNK * PIXELS_PER_TILE
-QUANTS_PER_CHUNK = TILES_PER_CHUNK * QUANTS_PER_TILE
-
-SCROLL_SPEED = 75 * QUANTS_PER_PIXEL
-
-assets: Dict[str, Surface] = {}
-tiles: dict = {}
-"""
+    def register_object(self, key, obj):
+        from tiles import Tilemap
+        from movable import Movable
+        from camera import Camera
+        if isinstance(obj, Tilemap):
+            target_dict = self.tilemaps
+        elif isinstance(obj, Movable):
+            target_dict = self.movables
+        elif isinstance(obj, Camera):
+            target_dict = self.cameras
+        else:
+            raise TypeError("Type {} cannot be registered as pygmalion object".format(type(obj)))
+        target_dict: Dict
+        o_type = type(obj)
+        if key in target_dict.keys():
+            raise KeyError("Key {} is already registered".format(key))
+        target_dict[key] = obj
+        return obj

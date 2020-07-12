@@ -8,6 +8,7 @@ from camera import Camera
 from gameglobals import Game
 
 
+# TODO: rework to not require explicit Game backref
 class Movable:
     def __init__(self, game: Game, coords, spriteid, weight, mapvelo):
         size = XY()
