@@ -61,10 +61,9 @@ game.register_object("player", Movable(
 ))
 game.register_object("main", MovableFollowingCamera(game, screen, game.movables["player"]))
 
-pygame.display.flip()
-interval = 0
-while True:
-    interval = game.clock.tick(60)  # how much time elapsed since last frame
+
+def mainloop(g: Game):
+    interval = g.clock.tick(60)  # how much time elapsed since last frame
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -96,17 +95,21 @@ while True:
         new_velo += XY(0, -1)
     if pressed_keys[pygame.K_RIGHT]:
         new_velo += XY(1, 0)
-    game.movables["player"].velo = new_velo
+    g.movables["player"].velo = new_velo
 
-    displace = game.movables["player"].get_collided_displace(
-        game.scroll_speed * interval/1000, game.tilemaps["worldmap"]
+    displace = g.movables["player"].get_collided_displace(
+        g.scroll_speed * interval/1000, g.tilemaps["worldmap"]
     )
-    game.movables["player"].move(displace)
+    g.movables["player"].move(displace)
 
-    game.cameras["main"].updateposition()
-    game.tilemaps["worldmap"].tocamera(game.cameras["main"])
-    game.movables["player"].tocamera(game.cameras["main"])
+    g.cameras["main"].updateposition()
+    g.tilemaps["worldmap"].tocamera(g.cameras["main"])
+    g.movables["player"].tocamera(g.cameras["main"])
 
     pygame.display.flip()
+
+
+game.on_tick = mainloop
+game.run()
 
 # and then close the whole thing

@@ -1,7 +1,7 @@
 import os
 
 from pygame import Surface, image
-from typing import Dict
+from typing import Dict, Callable
 
 from pygame.time import Clock
 
@@ -16,6 +16,7 @@ class Game:
     assets: Dict[str, Surface]
     tile_types: list
     tiles: dict
+    on_tick: Callable[["Game"], None]
 
     def __init__(
             self, *,
@@ -72,8 +73,11 @@ class Game:
         else:
             raise TypeError("Type {} cannot be registered as pygmalion object".format(type(obj)))
         target_dict: Dict
-        o_type = type(obj)
         if key in target_dict.keys():
             raise KeyError("Key {} is already registered".format(key))
         target_dict[key] = obj
         return obj
+
+    def run(self):
+        while True:
+            self.on_tick(self)
