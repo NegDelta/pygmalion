@@ -39,15 +39,15 @@ TILE_BLOCK = game.register_tiletype('block', True)
 
 def dummy_gradient_chunkgen(c: pygm_tiles.Chunk) -> List[List[int]]:
     if c.index.y < 0:
-        acc = [[0] * game.tiles_per_chunk] * game.tiles_per_chunk
+        acc = [[0] * c.game.tiles_per_chunk] * c.game.tiles_per_chunk
     elif c.index.y > 0:
-        acc = [[1] * game.tiles_per_chunk] * game.tiles_per_chunk
+        acc = [[1] * c.game.tiles_per_chunk] * c.game.tiles_per_chunk
     else:
         acc = []
-        for i in range(0, game.tiles_per_chunk):
+        for i in range(0, c.game.tiles_per_chunk):
             acc.append([])
-            for j in range(0, game.tiles_per_chunk):
-                if j / game.tiles_per_chunk > random.random():
+            for j in range(0, c.game.tiles_per_chunk):
+                if j / c.game.tiles_per_chunk > random.random():
                     acc[i].append(1)
                 else:
                     acc[i].append(0)
